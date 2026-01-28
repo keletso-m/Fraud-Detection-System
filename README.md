@@ -505,10 +505,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 Built with ❤️ by the Fraud Detection Team
 
-- **Lead Engineer**: [Your Name]
-- **ML Engineers**: [Team Members]
-- **Data Engineers**: [Team Members]
-- **DevOps**: [Team Members]
+- **Lead Engineer**: Keletso Monyamane
+- **ML Engineers**: Keletso Monyamane
+- **Data Engineers**: Keletso Monyamane
+- **DevOps**: Keletso Monyamane
 
 ---
 
