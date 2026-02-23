@@ -193,13 +193,13 @@ Sentinel uses a **transparent, weighted scoring model** — not a black box. Eve
 ## Version Roadmap
 
 ### Version 1 — Core System *(current)*
-- Rule-based detection for both modules
-- Simulated event input
-- SQLite storage
-- CLI alerts + log file
-- FastAPI interface
+- [ ] Rule-based detection for both modules
+- [ ] Simulated event input
+- [ ] SQLite storage
+- [ ] CLI alerts + log file
+- [ ] FastAPI interface
 
-### 🔧 Version 2 — One Meaningful Upgrade *(future add ons)*
+### Version 2 — future upgrades
 - [ ] Web dashboard (React or simple HTML/JS)
 - [ ] Email/SMS alerts via SendGrid or Twilio
 - [ ] Basic ML model to replace manual thresholds
