@@ -1,4 +1,4 @@
-# Sentinel — Security Monitoring & Fraud Detection System
+# Sentinel: Security Monitoring & Fraud Detection System
 
 > A unified mini security operations platform that monitors system activity and scores financial transactions for risk — built to be real, extensible, and interview-ready.
 
