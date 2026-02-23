@@ -19,7 +19,7 @@ This is not a toy project. It's not a fantasy enterprise system either. It's a f
 
 ## Core Features
 
-### 🔍 Intrusion & Activity Detection
+### Intrusion & Activity Detection
 Monitors system logs and events for:
 - Multiple failed login attempts within a time window
 - Access occurring at unusual hours
