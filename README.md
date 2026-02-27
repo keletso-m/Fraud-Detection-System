@@ -1,6 +1,6 @@
 # Sentinel: Security Monitoring & Fraud Detection System
 
-> A unified mini security operations platform that monitors system activity and scores financial transactions for risk — built to be real, extensible, and interview-ready.
+> A unified mini security operations platform that monitors system activity and scores financial transactions for risk.
 
 ---
 
@@ -13,7 +13,6 @@ Sentinel is a dual-module detection system that watches for suspicious behavior 
 
 Both modules feed into a **Central Risk Engine** that produces a unified risk score, reason flags, alert level, and incident log for every event.
 
-This is not a toy project. It's not a fantasy enterprise system either. It's a focused, honest piece of software that solves a real problem — and one you can fully defend in a technical interview.
 
 ---
 
