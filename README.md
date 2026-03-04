@@ -158,7 +158,7 @@ pytest tests/ -v
 
 ## Risk Scoring Logic
 
-Sentinel uses a **transparent, weighted scoring model** — not a black box. Every score comes with a plain-English explanation.
+Sentinel uses a **transparent, weighted scoring model** not a black box. Every score comes with a plain-English explanation.
 
 ### Activity Score Factors
 
@@ -210,7 +210,7 @@ Sentinel uses a **transparent, weighted scoring model** — not a black box. Eve
 ## Design Decisions
 
 **Why rule-based scoring instead of ML?**
-Rules are transparent, debuggable, and explainable — which matters in security contexts. Version 2 can introduce a model layer on top of an already-working system rather than replacing one that doesn't exist yet.
+Rules are transparent, debuggable, and explainable, which matters in security contexts. Version 2 can introduce a model layer on top of an already-working system rather than replacing one that doesn't exist yet.
 
 **Why SQLite?**
 It requires zero infrastructure to run locally, making this genuinely easy to set up and demo. The database layer is abstracted so PostgreSQL is a config change, not a rewrite.
