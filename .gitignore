@@ -1,0 +1,12 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+db/incidents.db
+logs/sentinel.log
+.DS_Store
+.vscode/
+*.egg-info/
+dist/
+build/
