@@ -15,6 +15,8 @@ Endpoints registered:
     POST /events/transaction      → submit a transaction event
     GET  /incidents               → list all incidents
     GET  /incidents/{incident_id} → get one incident by ID
+
+
 """
 
 import logging
@@ -27,6 +29,7 @@ from fastapi.responses import JSONResponse
 
 from app.routes import activity, transactions, incidents
 from scripts.init_db import init as init_db
+from fastapi.middleware.cors import CORSMiddleware
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
 ROOT    = Path(__file__).resolve().parent.parent
@@ -95,6 +98,13 @@ app = FastAPI(
     ),
     version="1.0.0",
     lifespan=lifespan,
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # ── Routes ─────────────────────────────────────────────────────────────────────
