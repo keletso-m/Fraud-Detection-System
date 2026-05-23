@@ -11,17 +11,17 @@ Sentinel is a dual-module detection system that watches for suspicious behaviour
 
 ---
 
-## ✅ Features Complete (v1 — current branch)
+## Features Complete (v1 — current branch)
 
 | Feature | Status | How to verify |
 |---|---|---|
-| Activity Detector | ✅ Done | `python simulator/run.py` |
-| Transaction Scorer | ✅ Done | `python simulator/run.py` |
-| Central Risk Engine | ✅ Done | `python simulator/run.py` |
-| Alert Handler (console + log) | ✅ Done | Check `logs/sentinel.log` after simulator |
-| SQLite persistence | ✅ Done | `python simulator/run.py` then check `db/incidents.db` |
-| Unit tests (39 tests) | ✅ Done | `pytest tests/ -v` |
-| FastAPI routes | ✅ Done | `uvicorn app.main:app --reload` → visit `/docs` |
+| Activity Detector | Done | `python simulator/run.py` |
+| Transaction Scorer | Done | `python simulator/run.py` |
+| Central Risk Engine | Done | `python simulator/run.py` |
+| Alert Handler (console + log) | Done | Check `logs/sentinel.log` after simulator |
+| SQLite persistence | Done | `python simulator/run.py` then check `db/incidents.db` |
+| Unit tests (39 tests) | Done | `pytest tests/ -v` |
+| FastAPI routes | Done | `uvicorn app.main:app --reload` → visit `/docs` |
 
 ---
 
