@@ -9,4 +9,4 @@ logs/sentinel.log
 .vscode/
 *.egg-info/
 dist/
-build/
+build/frontend/node_modules/
