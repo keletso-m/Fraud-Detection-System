@@ -15,9 +15,9 @@ async function request(method, path, body) {
 }
 
 export const api = {
-  health:             ()       => request('GET',  '/health'),
-  getIncidents:       (params) => request('GET',  `/incidents${params ? '?' + new URLSearchParams(params) : ''}`),
-  getIncident:        (id)     => request('GET',  `/incidents/${id}`),
-  postActivity:       (data)   => request('POST', '/events/activity',     data),
-  postTransaction:    (data)   => request('POST', '/events/transaction',  data),
+  health:          ()       => request('GET',  '/health'),
+  getIncidents:    (params) => request('GET',  `/incidents${params ? '?' + new URLSearchParams(params) : ''}`),
+  getIncident:     (id)     => request('GET',  `/incidents/${id}`),
+  postActivity:    (data)   => request('POST', '/events/activity',    data),
+  postTransaction: (data)   => request('POST', '/events/transaction', data),
 };
