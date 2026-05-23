@@ -28,8 +28,8 @@ ROOT    = Path(__file__).resolve().parent.parent
 DB_PATH = ROOT / "db" / "incidents.db"
 
 # ── Blending weights ───────────────────────────────────────────────────────────
-WEIGHT_ACTIVITY:     float = 0.5
-WEIGHT_TRANSACTION:  float = 0.5
+WEIGHT_ACTIVITY:    float = 0.5
+WEIGHT_TRANSACTION: float = 0.5
 
 # ── Alert level thresholds ─────────────────────────────────────────────────────
 LEVEL_CRITICAL: int = 75
@@ -77,10 +77,7 @@ def evaluate(
     activity_score    = int(activity_result.get("activity_score", 0))
     transaction_score = int(transaction_result.get("transaction_score", 0))
 
-    blended = int(
-        activity_score    * WEIGHT_ACTIVITY +
-        transaction_score * WEIGHT_TRANSACTION
-    )
+    blended     = int(activity_score * WEIGHT_ACTIVITY + transaction_score * WEIGHT_TRANSACTION)
     final_score = _clamp(blended)
     alert_level = _assign_level(final_score)
 
@@ -111,6 +108,46 @@ def evaluate(
     return result
 
 
+def get_incidents(limit: int = 50, min_score: int = 0) -> list[dict]:
+    """Return recent incidents from the DB, newest first."""
+    try:
+        con = sqlite3.connect(DB_PATH)
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
+        cur.execute("""
+            SELECT id, risk_score, alert_level, reason_flags, event_type, timestamp
+            FROM incidents
+            WHERE risk_score >= ?
+            ORDER BY id DESC
+            LIMIT ?
+        """, (min_score, limit))
+        rows = cur.fetchall()
+        con.close()
+        return [_row_to_dict(row) for row in rows]
+    except Exception as exc:
+        logger.error("Failed to fetch incidents: %s", exc)
+        return []
+
+
+def get_incident_by_id(incident_id) -> dict | None:
+    """Return a single incident by ID, or None if not found."""
+    try:
+        con = sqlite3.connect(DB_PATH)
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
+        cur.execute("""
+            SELECT id, risk_score, alert_level, reason_flags, event_type, timestamp
+            FROM incidents
+            WHERE id = ?
+        """, (int(incident_id),))
+        row = cur.fetchone()
+        con.close()
+        return _row_to_dict(row) if row else None
+    except Exception as exc:
+        logger.error("Failed to fetch incident %s: %s", incident_id, exc)
+        return None
+
+
 # ── Private helpers ────────────────────────────────────────────────────────────
 
 def _assign_level(score: int) -> str:
@@ -133,6 +170,17 @@ def _infer_event_type(activity_score: int, transaction_score: int) -> str:
 
 def _clamp(value: int) -> int:
     return min(max(value, 0), 100)
+
+
+def _row_to_dict(row: sqlite3.Row) -> dict:
+    return {
+        "id":           row["id"],
+        "risk_score":   row["risk_score"],
+        "alert_level":  row["alert_level"],
+        "reason_flags": row["reason_flags"].split("|") if row["reason_flags"] else [],
+        "event_type":   row["event_type"],
+        "timestamp":    row["timestamp"],
+    }
 
 
 def _persist(result: RiskResult) -> int | None:
