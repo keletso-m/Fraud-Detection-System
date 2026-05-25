@@ -1,7 +1,7 @@
 # 🛡 Sentinel
 **Security Monitoring & Fraud Detection System**
 
-Built by Keletso Monyamane · MIT License · Python 3.11+ · FastAPI · SQLite
+Built by Keletso Monyamane · MIT License · Python 3.11+ · FastAPI · SQLite . JavaScript . CSS . HTML
 
 ---
 
