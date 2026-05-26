@@ -10,11 +10,9 @@ Built by Keletso Monyamane · MIT License · Python 3.11+ · FastAPI · SQLite �
 ### Dashboard Overview
 ![Dashboard Overview](docs/screenshots/dashboard_overview.png)
 
-### Incidents List
-![Incidents List](docs/screenshots/dashboard_overview.png)
 
 ### Incident Detail Panel
-![Incident Detail Panel](docs/screenshots/incidents_and_detail_panel.png)
+![Incident_and_detail Panel](docs/screenshots/incidents_and_dtail_panel.png)
 
 ---
 
