@@ -5,6 +5,19 @@ Built by Keletso Monyamane · MIT License · Python 3.11+ · FastAPI · SQLite �
 
 ---
 
+## Screenshots
+
+### Dashboard Overview
+![Dashboard Overview](docs/screenshots/dashboard_overview.png)
+
+### Incidents List
+![Incidents List](docs/screenshots/dashboard_overview.png)
+
+### Incident Detail Panel
+![Incident Detail Panel](docs/screenshots/incidents_and_detail_panel.png)
+
+---
+
 ## What Is Sentinel?
 
 Sentinel is a dual-module detection system that watches for suspicious behaviour across two domains simultaneously — system activity and financial transactions. Both modules feed into a Central Risk Engine that produces a unified risk score (0–100), alert level, reason flags, and a persistent incident log for every event. A React dashboard provides a live ops view into everything.
