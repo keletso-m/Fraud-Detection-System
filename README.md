@@ -11,7 +11,7 @@ Built by Keletso Monyamane · MIT License · Python 3.11+ · FastAPI · SQLite �
 ![Dashboard Overview](docs/screenshots/dashboard_overview.png)
 
 
-### Incident Detail Panel
+### Incidents Detail Panel
 ![Incident_and_detail Panel](docs/screenshots/incidents_and_dtail_panel.png)
 
 ---
