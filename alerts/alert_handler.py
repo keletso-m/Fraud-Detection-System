@@ -6,6 +6,7 @@ Sentinel – Alert Handler
 Receives a RiskResult and dispatches it to:
   1. Colour-coded console output
   2. NDJSON rotating log file (logs/sentinel.log)
+  3. SMS via Twilio (CRITICAL alerts only)
 
 Usage:
     from alerts.alert_handler import dispatch
@@ -15,7 +16,12 @@ Usage:
 import json
 import logging
 import logging.handlers
+import os
 from pathlib import Path
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 logger = logging.getLogger("sentinel.alert_handler")
 
@@ -46,7 +52,7 @@ ICONS = {
 
 def dispatch(result) -> None:
     """
-    Dispatch a RiskResult to console and log file.
+    Dispatch a RiskResult to console, log file, and SMS (CRITICAL only).
     Accepts either a RiskResult dataclass or a plain dict.
     """
     if hasattr(result, "to_dict"):
@@ -56,6 +62,9 @@ def dispatch(result) -> None:
 
     _console(data)
     _log_ndjson(data)
+
+    if data.get("alert_level") == "CRITICAL":
+        _sms(data)
 
 
 # ── Private helpers ────────────────────────────────────────────────────────────
@@ -88,3 +97,41 @@ def _log_ndjson(data: dict) -> None:
             fh.write(json.dumps(data) + "\n")
     except Exception as exc:
         logger.error("Failed to write alert log: %s", exc)
+
+
+def _sms(data: dict) -> None:
+    """Send an SMS via Twilio for CRITICAL alerts."""
+    account_sid = os.getenv("TWILIO_ACCOUNT_SID")
+    auth_token  = os.getenv("TWILIO_AUTH_TOKEN")
+    from_number = os.getenv("TWILIO_FROM_NUMBER")
+    to_number   = os.getenv("TWILIO_TO_NUMBER")
+
+    if not all([account_sid, auth_token, from_number, to_number]):
+        logger.warning("Twilio credentials not set — skipping SMS alert.")
+        return
+
+    try:
+        from twilio.rest import Client
+        client = Client(account_sid, auth_token)
+
+        flags = data.get("reason_flags", [])
+        top_flags = ", ".join(flags[:3]) if flags else "none"
+
+        body = (
+            f"🔴 SENTINEL CRITICAL ALERT\n"
+            f"Score: {data.get('risk_score')}/100\n"
+            f"Event: {data.get('event_type')}\n"
+            f"Flags: {top_flags}\n"
+            f"Time: {data.get('timestamp', '')[:19]}"
+        )
+
+        message = client.messages.create(
+            body=body,
+            from_=from_number,
+            to=to_number,
+        )
+        logger.info("SMS alert sent | sid=%s", message.sid)
+        print(f"📱 SMS alert sent ({message.sid})")
+
+    except Exception as exc:
+        logger.error("Failed to send SMS alert: %s", exc)
