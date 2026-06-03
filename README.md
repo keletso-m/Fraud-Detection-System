@@ -34,10 +34,12 @@ Sentinel is a dual-module detection system that watches for suspicious behaviour
 | Unit tests (39 tests) | Done |
 | FastAPI REST API | Done |
 | React dashboard (overview, incidents, submit events) | Done |
+| swagger/OpenAPI |  Done |
 | Email / SMS alerts (Twilio) |  In progress |
 | Apache Kafka event pipeline |  Planned |
 | ML scoring layer |  Planned |
-| PostgreSQL upgrade |  Planned |
+| API rate limiting  |  Planned |
+
 
 ---
 
@@ -193,13 +195,13 @@ Transparent, weighted scoring — not a black box. Every score comes with plain-
 
 ##  Design Decisions
 
-**Why rule-based scoring instead of ML?** Rules are transparent, debuggable, and explainable — which matters in security. An ML layer is planned for v2 on top of a working, auditable baseline.
+**Why rule-based scoring instead of ML?** Rules are transparent, debuggable, and explainable which matters in security. An ML layer is planned for v2 on top of a working, auditable baseline.
 
 **Why SQLite?** Zero infrastructure to run locally. The DB layer is abstracted in `risk_engine.py` so PostgreSQL is a config change, not a rewrite.
 
-**Why a unified risk engine?** A combined signal is more actionable than two separate alerts. A user flagged by both detectors simultaneously is a much stronger indicator than either alone — Scenario 5 in the simulator scores 92/100 for exactly this reason.
+**Why a unified risk engine?** A combined signal is more actionable than two separate alerts. A user flagged by both detectors simultaneously is a much stronger indicator than either alone Scenario 5 in the simulator scores 92/100 for exactly this reason.
 
-**Why separate frontend and backend?** The React app talks to FastAPI via a REST API, keeping the two independently deployable. The `proxy` field in `package.json` handles CORS in development — in production you'd put both behind a reverse proxy like nginx.
+**Why separate frontend and backend?** The React app talks to FastAPI via a REST API, keeping the two independently deployable. The `proxy` field in `package.json` handles CORS in development in production you'd put both behind a reverse proxy like nginx.
 
 ---
 
