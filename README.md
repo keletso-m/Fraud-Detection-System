@@ -39,6 +39,7 @@ Sentinel is a dual-module detection system that watches for suspicious behaviour
 | Apache Kafka event pipeline |  Planned |
 | ML scoring layer |  Planned |
 | API rate limiting  |  Planned |
+| prometheus metrics |  Planned |
 
 
 ---
