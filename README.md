@@ -36,6 +36,15 @@ Sentinel is a dual-module detection system that watches for suspicious behaviour
 | React dashboard (overview, incidents, submit events) | Done |
 | swagger/OpenAPI |  Done |
 | Email / SMS alerts (Twilio) |  In progress |
+| Event simulator/agent | planned |
+| Event correlation | planned |
+| Better risk explanations | planned |
+| Aunthentication/ authorization | planned |
+| user/entity history | planned |
+| Search/filter events | planned |
+| Severity workflow | planned |
+| Rate limiting | planne |
+| Intergration tests | planned |
 | Apache Kafka event pipeline |  Planned |
 | ML scoring layer |  Planned |
 | API rate limiting  |  Planned |
