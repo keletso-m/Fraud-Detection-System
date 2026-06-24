@@ -43,7 +43,7 @@ Sentinel is a dual-module detection system that watches for suspicious behaviour
 | user/entity history | planned |
 | Search/filter events | planned |
 | Severity workflow | planned |
-| Rate limiting | planne |
+| Rate limiting | planned |
 | Intergration tests | planned |
 | Apache Kafka event pipeline |  Planned |
 | ML scoring layer |  Planned |
