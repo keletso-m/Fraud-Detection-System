@@ -1,17 +1,3 @@
-"""
-alerts/alert_handler.py
-────────────────────────────────────────────────────────────
-Sentinel – Alert Handler
-
-Receives a RiskResult and dispatches it to:
-  1. Colour-coded console output
-  2. NDJSON rotating log file (logs/sentinel.log)
-  3. SMS via Twilio (CRITICAL alerts only)
-
-Usage:
-    from alerts.alert_handler import dispatch
-    dispatch(risk_result)
-"""
 
 import json
 import logging
@@ -25,12 +11,12 @@ load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 logger = logging.getLogger("sentinel.alert_handler")
 
-# ── Paths ──────────────────────────────────────────────────────────────────────
+#  Paths 
 ROOT     = Path(__file__).resolve().parent.parent
 LOG_DIR  = ROOT / "logs"
 LOG_FILE = LOG_DIR / "sentinel.log"
 
-# ── ANSI colour codes ──────────────────────────────────────────────────────────
+#  ANSI colour codes
 COLOURS = {
     "LOW":      "\033[92m",   # green
     "MEDIUM":   "\033[93m",   # yellow
@@ -48,7 +34,7 @@ ICONS = {
 }
 
 
-# ── Public interface ───────────────────────────────────────────────────────────
+#  Public interface 
 
 def dispatch(result) -> None:
     """
@@ -67,7 +53,8 @@ def dispatch(result) -> None:
         _sms(data)
 
 
-# ── Private helpers ────────────────────────────────────────────────────────────
+# Private helpers 
+# receives risk result and dispatches to color coded console output 
 
 def _console(data: dict) -> None:
     level  = data.get("alert_level", "LOW")
@@ -88,7 +75,7 @@ def _console(data: dict) -> None:
         print(f"   Flags : none")
     print(f"{colour}{BOLD}{'─' * 56}{RESET}\n")
 
-
+# dispatched the risk result to the rotating log file in NDJSON format
 def _log_ndjson(data: dict) -> None:
     """Append one NDJSON line to the rotating sentinel.log file."""
     try:
@@ -98,7 +85,7 @@ def _log_ndjson(data: dict) -> None:
     except Exception as exc:
         logger.error("Failed to write alert log: %s", exc)
 
-
+# dispatched the risk result to Twilio for CRITICAL alerts only
 def _sms(data: dict) -> None:
     """Send an SMS via Twilio for CRITICAL alerts."""
     account_sid = os.getenv("TWILIO_ACCOUNT_SID")

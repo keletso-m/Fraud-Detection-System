@@ -1,12 +1,3 @@
-"""
-app/routes/activity.py
-────────────────────────────────────────────────────────────
-Sentinel – Activity Event Route
-
-POST /events/activity
-    Submit a system activity event for intrusion scoring.
-    Runs through activity_detector → risk_engine → alert_handler.
-"""
 
 import logging
 from fastapi import APIRouter, HTTPException
@@ -21,7 +12,7 @@ logger = logging.getLogger("sentinel.routes.activity")
 router = APIRouter()
 
 
-# ── Request model ──────────────────────────────────────────────────────────────
+# Request model 
 
 class ActivityEvent(BaseModel):
     username:      str   = Field(...,  example="alice")
@@ -31,7 +22,7 @@ class ActivityEvent(BaseModel):
     command:       str   = Field("",   example="cat /etc/passwd")
 
 
-# ── Route ──────────────────────────────────────────────────────────────────────
+# Route 
 
 @router.post("/activity", summary="Submit a system activity event")
 def submit_activity(event: ActivityEvent):
@@ -44,8 +35,8 @@ def submit_activity(event: ActivityEvent):
     try:
         activity_result = analyse(event.model_dump())
 
-        # Transaction scorer gets a zero-score placeholder when only
-        # an activity event is submitted — the combined score still works.
+        # Transaction scorer gets a zero score placeholder when only
+        # an activity event is submitted the combined score still works
         transaction_result = tx_score({
             "account_id": event.username,
             "amount": 0,

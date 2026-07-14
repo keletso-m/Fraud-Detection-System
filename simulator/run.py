@@ -13,7 +13,7 @@ Run from the project root:
 import sys
 from pathlib import Path
 
-# Make sure project root is on the path
+#for  making sure project root is on the path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 

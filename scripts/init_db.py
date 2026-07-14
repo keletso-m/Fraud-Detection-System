@@ -1,13 +1,6 @@
 """
-scripts/init_db.py
-────────────────────────────────────────────────────────────
-Sentinel – Database Initialiser
-
 Creates the SQLite database and incidents table.
-Safe to run multiple times — uses CREATE TABLE IF NOT EXISTS.
-
-Usage:
-    python scripts/init_db.py
+Safe to run multiple times uses CREATE TABLE IF NOT EXISTS.
 """
 
 import sqlite3

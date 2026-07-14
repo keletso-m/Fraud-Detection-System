@@ -1,11 +1,3 @@
-"""
-app/routes/incidents.py
-────────────────────────────────────────────────────────────
-Sentinel – Incidents Route
-
-GET /incidents               → list recent incidents
-GET /incidents/{incident_id} → get one incident by ID
-"""
 
 import logging
 from fastapi import APIRouter, HTTPException, Query

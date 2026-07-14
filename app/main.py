@@ -1,21 +1,8 @@
 """
-app/main.py
-────────────────────────────────────────────────────────────
-Sentinel – FastAPI Entry Point
+ FastAPI Entry Point
 
 Starts the API server and wires up all routes.
-
-Usage:
-    uvicorn app.main:app --reload
-
-Endpoints registered:
-    GET  /                        → welcome / status
-    GET  /health                  → liveness check (never touches DB)
-    POST /events/activity         → submit a system activity event
-    POST /events/transaction      → submit a transaction event
-    GET  /incidents               → list all incidents
-    GET  /incidents/{incident_id} → get one incident by ID
-
+usage:  python -m uvicorn app.main:app --reload
 
 """
 
@@ -31,14 +18,14 @@ from app.routes import activity, transactions, incidents
 from scripts.init_db import init as init_db
 from fastapi.middleware.cors import CORSMiddleware
 
-# ── Paths ──────────────────────────────────────────────────────────────────────
+#  Paths 
 ROOT    = Path(__file__).resolve().parent.parent
 LOG_DIR = ROOT / "logs"
 LOG_FILE = LOG_DIR / "sentinel.log"
 
 
-# ── Logging setup ──────────────────────────────────────────────────────────────
-# Configure once here — all modules use logging.getLogger("sentinel.*")
+#  Logging setup 
+# Configure once here  all modules use logging.getLogger
 # and inherit this config automatically.
 
 def _configure_logging() -> None:
@@ -71,7 +58,7 @@ def _configure_logging() -> None:
     root_logger.addHandler(file_handler)
 
 
-# ── Lifespan — runs on startup and shutdown ────────────────────────────────────
+#  Lifespan runs on startup and shutdown 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -88,7 +75,7 @@ async def lifespan(app: FastAPI):
     logger.info("Sentinel shutting down.")
 
 
-# ── App ────────────────────────────────────────────────────────────────────────
+#  App
 
 app = FastAPI(
     title="Sentinel",
@@ -107,14 +94,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── Routes ─────────────────────────────────────────────────────────────────────
+# Routes 
 
 app.include_router(activity.router,     prefix="/events",    tags=["Events"])
 app.include_router(transactions.router, prefix="/events",    tags=["Events"])
 app.include_router(incidents.router,    prefix="/incidents", tags=["Incidents"])
 
 
-# ── Root + health ──────────────────────────────────────────────────────────────
+#  Root + health
 
 @app.get("/", tags=["Status"])
 def root():

@@ -1,23 +1,9 @@
-"""
-tests/test_engine.py
-────────────────────────────────────────────────────────────
-Sentinel – Unit Tests
-
-Covers:
-  - activity_detector  : all 4 signals, edge cases
-  - transaction_scorer : all 4 signals, edge cases
-  - risk_engine        : scoring, alert levels, combined signal
-  - integration        : full pipeline end-to-end (no DB write)
-
-Run with:
-    pytest tests/ -v
-"""
 
 import sys
 from pathlib import Path
 from unittest.mock import patch
 
-# ── Make sure project root is on the path ─────────────────────────────────────
+#  Make sure project root is on the path so we can import engine modules
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
@@ -26,9 +12,9 @@ from engine.transaction_scorer import score, _clamp as tx_clamp
 from engine.risk_engine import evaluate, _assign_level, RiskResult
 
 
-# ══════════════════════════════════════════════════════════════════════════════
+
 # Helpers — reusable clean event templates
-# ══════════════════════════════════════════════════════════════════════════════
+
 
 def clean_activity_event(**overrides) -> dict:
     """A baseline activity event that should trigger zero flags."""
@@ -66,9 +52,9 @@ def zero_transaction() -> dict:
     return {"transaction_score": 0, "reasons": []}
 
 
-# ══════════════════════════════════════════════════════════════════════════════
+
 # activity_detector tests
-# ══════════════════════════════════════════════════════════════════════════════
+
 
 class TestActivityDetector:
 
@@ -77,7 +63,9 @@ class TestActivityDetector:
         assert result["activity_score"] == 0
         assert result["reasons"] == []
 
-    # ── Failed logins ──────────────────────────────────────────────────────────
+    # Failed logins 
+
+    # Failed logins
 
     def test_failed_logins_at_threshold_no_flag(self):
         """Exactly 5 failed logins should NOT trigger (rule is > 5)."""
@@ -94,7 +82,7 @@ class TestActivityDetector:
         assert result["activity_score"] == 30
         assert len(result["reasons"]) == 1
 
-    # ── Odd hours ──────────────────────────────────────────────────────────────
+    # Odd hours
 
     def test_odd_hour_midnight_triggers(self):
         result = analyse(clean_activity_event(timestamp="2024-11-01T00:30:00"))
@@ -123,7 +111,7 @@ class TestActivityDetector:
         result = analyse(clean_activity_event(timestamp=""))
         assert isinstance(result["activity_score"], int)
 
-    # ── Unknown IP ─────────────────────────────────────────────────────────────
+    # Unknown IP
 
     def test_unknown_ip_triggers(self):
         result = analyse(clean_activity_event(ip_address="203.0.113.99"))
@@ -134,7 +122,7 @@ class TestActivityDetector:
         result = analyse(clean_activity_event(ip_address="127.0.0.1"))
         assert result["activity_score"] == 0
 
-    # ── Suspicious commands ────────────────────────────────────────────────────
+    # Suspicious commands
 
     def test_suspicious_command_rm_rf(self):
         result = analyse(clean_activity_event(command="rm -rf /tmp/data"))
@@ -152,7 +140,7 @@ class TestActivityDetector:
         result = analyse(clean_activity_event(command="python manage.py runserver"))
         assert result["activity_score"] == 0
 
-    # ── Score clamping ─────────────────────────────────────────────────────────
+    # Score clamping
 
     def test_all_signals_clamped_to_100(self):
         """All 4 signals = 30+15+25+30 = 100. Should be exactly 100, not over."""
@@ -172,9 +160,9 @@ class TestActivityDetector:
         assert act_clamp(999) == 100
 
 
-# ══════════════════════════════════════════════════════════════════════════════
+
 # transaction_scorer tests
-# ══════════════════════════════════════════════════════════════════════════════
+
 
 class TestTransactionScorer:
 
@@ -183,7 +171,7 @@ class TestTransactionScorer:
         assert result["transaction_score"] == 0
         assert result["reasons"] == []
 
-    # ── High amount ────────────────────────────────────────────────────────────
+    # High amount
 
     def test_high_amount_triggers(self):
         result = score(clean_transaction_event(amount=15_000.00))
@@ -199,7 +187,7 @@ class TestTransactionScorer:
         result = score(clean_transaction_event(amount=10_000.01))
         assert result["transaction_score"] == 25
 
-    # ── Rapid transactions ─────────────────────────────────────────────────────
+    # Rapid transactions
 
     def test_rapid_tx_triggers(self):
         result = score(clean_transaction_event(recent_tx_count=3))
@@ -209,7 +197,7 @@ class TestTransactionScorer:
         result = score(clean_transaction_event(recent_tx_count=2))
         assert result["transaction_score"] == 0
 
-    # ── Location mismatch ─────────────────────────────────────────────────────
+    # Location mismatch
 
     def test_location_mismatch_triggers(self):
         result = score(clean_transaction_event(
@@ -239,7 +227,7 @@ class TestTransactionScorer:
         result = score(clean_transaction_event(last_location=""))
         assert result["transaction_score"] == 0
 
-    # ── New device ────────────────────────────────────────────────────────────
+    # New device
 
     def test_new_device_triggers(self):
         result = score(clean_transaction_event(
@@ -263,7 +251,7 @@ class TestTransactionScorer:
         ))
         assert result["transaction_score"] == 20
 
-    # ── All signals + clamping ────────────────────────────────────────────────
+    # All signals + clamping 
 
     def test_all_signals_score_100(self):
         """25+30+25+20 = 100. Should hit exactly 100."""
@@ -285,9 +273,9 @@ class TestTransactionScorer:
         assert tx_clamp(200) == 100
 
 
-# ══════════════════════════════════════════════════════════════════════════════
+
 # risk_engine tests
-# ══════════════════════════════════════════════════════════════════════════════
+
 
 class TestRiskEngine:
 
@@ -296,7 +284,7 @@ class TestRiskEngine:
         with patch("engine.risk_engine._persist"):
             return evaluate(activity, transaction, context=context)
 
-    # ── Alert level assignment ─────────────────────────────────────────────────
+    # Alert level assignment
 
     def test_assign_level_low(self):
         assert _assign_level(0)  == "LOW"
@@ -314,7 +302,7 @@ class TestRiskEngine:
         assert _assign_level(75)  == "CRITICAL"
         assert _assign_level(100) == "CRITICAL"
 
-    # ── Score blending ─────────────────────────────────────────────────────────
+    # Score blending
 
     def test_zero_both_scores_zero(self):
         result = self._evaluate(zero_activity(), zero_transaction())
@@ -348,7 +336,7 @@ class TestRiskEngine:
         assert result.risk_score == 100
         assert result.alert_level == "CRITICAL"
 
-    # ── Reasons merged correctly ───────────────────────────────────────────────
+    # Reasons merged correctly
 
     def test_reasons_from_both_detectors_combined(self):
         result = self._evaluate(
@@ -363,7 +351,7 @@ class TestRiskEngine:
         result = self._evaluate(zero_activity(), zero_transaction())
         assert result.reasons == []
 
-    # ── Result structure ───────────────────────────────────────────────────────
+    # Result structure
 
     def test_result_has_incident_id(self):
         result = self._evaluate(zero_activity(), zero_transaction())
@@ -397,7 +385,7 @@ class TestRiskEngine:
         assert "alert_level" in d
         assert "reasons" in d
 
-    # ── Score is always valid ──────────────────────────────────────────────────
+    # Score is always valid 
 
     def test_risk_score_always_0_to_100(self):
         for act in [0, 50, 100]:
@@ -409,9 +397,9 @@ class TestRiskEngine:
                 assert 0 <= result.risk_score <= 100
 
 
-# ══════════════════════════════════════════════════════════════════════════════
+
 # Integration test — full pipeline, no DB
-# ══════════════════════════════════════════════════════════════════════════════
+
 
 class TestFullPipeline:
 

@@ -1,11 +1,6 @@
 """
-app/routes/transactions.py
-────────────────────────────────────────────────────────────
-Sentinel – Transaction Event Route
-
-POST /events/transaction
     Submit a financial transaction for fraud scoring.
-    Runs through transaction_scorer → risk_engine → alert_handler.
+    Runs through transaction_scorer to risk_engine to alert_handler.
 """
 
 import logging
@@ -21,7 +16,7 @@ logger = logging.getLogger("sentinel.routes.transactions")
 router = APIRouter()
 
 
-# ── Request model ──────────────────────────────────────────────────────────────
+# Request model
 
 class TransactionEvent(BaseModel):
     account_id:      str        = Field(...,  example="ACC-001")
@@ -38,7 +33,7 @@ class TransactionEvent(BaseModel):
     ip_address:      str        = Field("unknown", example="10.0.0.1")
 
 
-# ── Route ──────────────────────────────────────────────────────────────────────
+#  Route 
 
 @router.post("/transaction", summary="Submit a financial transaction event")
 def submit_transaction(event: TransactionEvent):
