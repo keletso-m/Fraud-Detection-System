@@ -17,6 +17,7 @@ from fastapi.responses import JSONResponse
 from app.routes import activity, transactions, incidents
 from scripts.init_db import init as init_db
 from fastapi.middleware.cors import CORSMiddleware
+from app.routes.auth import router as auth_router
 
 #  Paths 
 ROOT    = Path(__file__).resolve().parent.parent
