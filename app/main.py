@@ -43,7 +43,7 @@ def _configure_logging() -> None:
         datefmt="%Y-%m-%d %H:%M:%S",
     ))
 
-    # Rotating file handler — never grows unbounded
+    # rotating file handler never grows unbounded
     file_handler = logging.handlers.RotatingFileHandler(
         LOG_FILE,
         maxBytes=5 * 1024 * 1024,   # 5 MB
@@ -59,7 +59,7 @@ def _configure_logging() -> None:
     root_logger.addHandler(file_handler)
 
 
-#  Lifespan runs on startup and shutdown 
+#  lifespan runs on startup and shutdown 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -71,7 +71,7 @@ async def lifespan(app: FastAPI):
     logger.info("Database ready.")
     logger.info("Sentinel is live.")
 
-    yield   # ← server runs here
+    yield   #the  server runs here
 
     logger.info("Sentinel shutting down.")
 
@@ -97,6 +97,7 @@ app.add_middleware(
 
 # Routes 
 
+app.include_router(auth_router,                          tags=["Auth"])
 app.include_router(activity.router,     prefix="/events",    tags=["Events"])
 app.include_router(transactions.router, prefix="/events",    tags=["Events"])
 app.include_router(incidents.router,    prefix="/incidents", tags=["Incidents"])
@@ -119,7 +120,7 @@ def root():
 def health():
     """
     Liveness check.
-    Always returns 200 OK — intentionally does NOT touch the database.
-    Use this for load balancer health checks and uptime monitors.
+    Always returns 200 OK intentionally doesnt touch the database
+    Use this for load balancer health checks and uptime monitors
     """
     return {"status": "ok"}
