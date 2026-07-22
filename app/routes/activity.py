@@ -1,5 +1,6 @@
 
 import logging
+from fastapi import APIRouter, HTTPException, Depends
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
@@ -7,6 +8,7 @@ from engine.activity_detector import analyse
 from engine.transaction_scorer import score as tx_score
 from engine.risk_engine import evaluate
 from alerts.alert_handler import dispatch
+from app.auth.dependencies import require_admin
 
 logger = logging.getLogger("sentinel.routes.activity")
 router = APIRouter()
@@ -24,14 +26,17 @@ class ActivityEvent(BaseModel):
 
 # Route 
 
+
+
 @router.post("/activity", summary="Submit a system activity event")
-def submit_activity(event: ActivityEvent):
+def submit_activity(event: ActivityEvent, _=Depends(require_admin)):
     """
     Analyse a system activity event for intrusion signals.
 
     Returns the full risk result including score, alert level, and reasons.
     The incident is persisted to the database automatically.
     """
+    
     try:
         activity_result = analyse(event.model_dump())
 
@@ -67,3 +72,4 @@ def submit_activity(event: ActivityEvent):
     except Exception as exc:
         logger.error("Error processing activity event: %s", exc)
         raise HTTPException(status_code=500, detail="Failed to process activity event.")
+
