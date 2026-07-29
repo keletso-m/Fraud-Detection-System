@@ -4,7 +4,8 @@
 """
 
 import logging
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
+from app.auth.dependencies import require_admin
 from pydantic import BaseModel, Field
 
 from engine.activity_detector import analyse as activity_analyse
@@ -36,7 +37,7 @@ class TransactionEvent(BaseModel):
 #  Route 
 
 @router.post("/transaction", summary="Submit a financial transaction event")
-def submit_transaction(event: TransactionEvent):
+def submit_transaction(event: TransactionEvent, _=Depends(require_admin)):
     """
     Score a financial transaction for fraud signals.
 

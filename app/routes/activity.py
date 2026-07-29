@@ -1,6 +1,7 @@
 
 import logging
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
+from app.auth.dependencies import require_admin
 from pydantic import BaseModel, Field
 
 from engine.activity_detector import analyse
@@ -25,7 +26,7 @@ class ActivityEvent(BaseModel):
 # Route 
 
 @router.post("/activity", summary="Submit a system activity event")
-def submit_activity(event: ActivityEvent):
+def submit_activity(event: ActivityEvent,  _=Depends(require_admin)):
     """
     Analyse a system activity event for intrusion signals.
 

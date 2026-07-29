@@ -1,6 +1,7 @@
 
 import logging
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
+from app.auth.dependencies import require_viewer
 
 from engine.risk_engine import get_incidents, get_incident_by_id
 
@@ -12,6 +13,7 @@ router = APIRouter()
 def list_incidents(
     limit:     int = Query(50,  ge=1, le=500, description="Max incidents to return"),
     min_score: int = Query(0,   ge=0, le=100, description="Minimum risk score filter"),
+     _=Depends(require_viewer)
 ):
     """
     Return recent incidents from the database, newest first.
@@ -22,7 +24,7 @@ def list_incidents(
     return {"count": len(incidents), "incidents": incidents}
 
 
-@router.get("/{incident_id}", summary="Get one incident by ID")
+@router.get("/{incident_id}", summary="Get one incident by ID", _=Depends(require_viewer))
 def get_incident(incident_id: str):
     """Return a single incident record by its UUID."""
     incident = get_incident_by_id(incident_id)
