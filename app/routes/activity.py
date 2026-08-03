@@ -14,12 +14,9 @@ from fastapi import APIRouter, HTTPException, Depends, Request
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
-
-
 logger = logging.getLogger("sentinel.routes.activity")
 router = APIRouter()
 limiter = Limiter(key_func=get_remote_address)
-
 
 # Request model 
 
