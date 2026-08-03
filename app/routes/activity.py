@@ -15,8 +15,10 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 
 
+
 logger = logging.getLogger("sentinel.routes.activity")
 router = APIRouter()
+limiter = Limiter(key_func=get_remote_address)
 
 
 # Request model 
@@ -34,7 +36,8 @@ class ActivityEvent(BaseModel):
 
 
 @router.post("/activity", summary="Submit a system activity event")
-def submit_activity(event: ActivityEvent, _=Depends(require_admin)):
+@limiter.limit("10/minute")
+def submit_activity(request: Request, event: ActivityEvent, _=Depends(require_admin)):
     """
     Analyse a system activity event for intrusion signals.
 
