@@ -2,7 +2,12 @@ from fastapi import APIRouter, HTTPException, status
 from app.auth.schemas import RegisterRequest, LoginRequest, TokenResponse
 from app.auth.models import create_user, get_user, verify_password
 from app.auth.jwt import create_access_token
+# add slowapi imports for rate limiting
+from fastapi import APIRouter, HTTPException, status, Request
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
+limiter = Limiter(key_func=get_remote_address)
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
