@@ -11,8 +11,9 @@ limiter = Limiter(key_func=get_remote_address)
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@router.post("/register", status_code=status.HTTP_201_CREATED)
-def register(body: RegisterRequest):
+@router.post("/login", response_model=TokenResponse)
+@limiter.limit("5/minute")
+def login(request: Request, body: LoginRequest):
     ok = create_user(body.username, body.password, body.role)
     if not ok:
         raise HTTPException(
