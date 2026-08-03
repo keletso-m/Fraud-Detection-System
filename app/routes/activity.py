@@ -3,12 +3,17 @@ import logging
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
-
 from engine.activity_detector import analyse
 from engine.transaction_scorer import score as tx_score
 from engine.risk_engine import evaluate
 from alerts.alert_handler import dispatch
 from app.auth.dependencies import require_admin
+
+# slowapi imports for rate limiting
+from fastapi import APIRouter, HTTPException, Depends, Request
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+
 
 logger = logging.getLogger("sentinel.routes.activity")
 router = APIRouter()
