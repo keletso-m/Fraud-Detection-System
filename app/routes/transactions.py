@@ -17,6 +17,7 @@ from fastapi import APIRouter, HTTPException, Depends, Request
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
+limiter = Limiter(key_func=get_remote_address)
 logger = logging.getLogger("sentinel.routes.transactions")
 router = APIRouter()
 
@@ -41,7 +42,8 @@ class TransactionEvent(BaseModel):
 #  Route 
 
 @router.post("/transaction", summary="Submit a financial transaction event")
-def submit_transaction(event: TransactionEvent, _=Depends(require_admin)):
+@limiter.limit("10/minute")
+def submit_transaction(request: Request, event: TransactionEvent, _=Depends(require_admin)):
     """
     Score a financial transaction for fraud signals.
 
