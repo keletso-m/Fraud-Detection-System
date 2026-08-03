@@ -1,4 +1,4 @@
-# 🛡 Sentinel
+# Sentinel
 **Security Monitoring & Fraud Detection System**
 
 Built by Keletso Monyamane · MIT License · Python 3.11+ · FastAPI · SQLite · React
@@ -39,14 +39,13 @@ Sentinel is an event-driven security monitoring platform that collects, analyzes
 | Event simulator/agent | planned |
 | Event correlation | planned |
 | Better risk explanations | planned |
-| Aunthentication/ authorization | planned |
+| Aunthentication/ authorization | In progress |
 | user/entity history | planned |
 | Search/filter events | Done |
 | Severity workflow | planned |
 | Rate limiting | planned |
 | Intergration tests | planned |
 | Apache Kafka event pipeline |  Planned |
-| ML scoring layer |  Planned |
 | API rate limiting  |  Planned |
 | prometheus metrics |  Planned |
 
