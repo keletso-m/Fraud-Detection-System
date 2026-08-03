@@ -18,6 +18,10 @@ from app.routes import activity, transactions, incidents
 from scripts.init_db import init as init_db
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes.auth import router as auth_router
+# slowapi entry points for rate limiting
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 #  Paths 
 ROOT    = Path(__file__).resolve().parent.parent
@@ -76,7 +80,7 @@ async def lifespan(app: FastAPI):
     logger.info("Sentinel shutting down.")
 
 
-#  App
+#  fastapi app instance
 
 app = FastAPI(
     title="Sentinel",
