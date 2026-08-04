@@ -16,7 +16,8 @@ def init():
                 risk_score  REAL    NOT NULL,
                 severity    TEXT    NOT NULL,
                 reasons     TEXT    NOT NULL,
-                raw_event   TEXT    NOT NULL
+                raw_event   TEXT    NOT NULL,
+                 state       TEXT    NOT NULL DEFAULT 'open'
             )
         """)
 
