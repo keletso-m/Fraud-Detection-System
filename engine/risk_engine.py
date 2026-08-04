@@ -1,19 +1,3 @@
-"""
-engine/risk_engine.py
-────────────────────────────────────────────────────────────
-Sentinel – Central Risk Engine
-
-Combines activity and transaction scores into a single unified
-risk result, assigns an alert level, and persists the incident
-to SQLite.
-
-Usage:
-    result = evaluate(activity_result, transaction_result, context)
-    result.risk_score    # int 0–100
-    result.alert_level   # "LOW" | "MEDIUM" | "HIGH" | "CRITICAL"
-    result.reason_flags  # list[str]
-    result.to_dict()     # serialisable dict for API responses
-"""
 
 import logging
 import sqlite3
@@ -23,15 +7,15 @@ from pathlib import Path
 
 logger = logging.getLogger("sentinel.risk_engine")
 
-# ── DB path ────────────────────────────────────────────────────────────────────
+#  DB path 
 ROOT    = Path(__file__).resolve().parent.parent
 DB_PATH = ROOT / "db" / "incidents.db"
 
-# ── Blending weights ───────────────────────────────────────────────────────────
+#  Blending weights 
 WEIGHT_ACTIVITY:    float = 0.5
 WEIGHT_TRANSACTION: float = 0.5
 
-# ── Alert level thresholds ─────────────────────────────────────────────────────
+#  alert level thresholds 
 LEVEL_CRITICAL: int = 75
 LEVEL_HIGH:     int = 50
 LEVEL_MEDIUM:   int = 25
@@ -61,17 +45,14 @@ class RiskResult:
         }
 
 
-# ── Public interface ───────────────────────────────────────────────────────────
+#  Public interface
 
 def evaluate(
     activity_result:    dict,
     transaction_result: dict,
     context:            dict | None = None,
 ) -> RiskResult:
-    """
-    Combine activity + transaction scores into a unified RiskResult.
-    Persists the incident to SQLite and returns the full result.
-    """
+     
     context = context or {}
 
     activity_score    = int(activity_result.get("activity_score", 0))
@@ -148,7 +129,7 @@ def get_incident_by_id(incident_id) -> dict | None:
         return None
 
 
-# ── Private helpers ────────────────────────────────────────────────────────────
+#helper functions 
 
 def _assign_level(score: int) -> str:
     if score >= LEVEL_CRITICAL:
