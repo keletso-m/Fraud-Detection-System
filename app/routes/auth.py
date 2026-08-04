@@ -2,12 +2,17 @@ from fastapi import APIRouter, HTTPException, status
 from app.auth.schemas import RegisterRequest, LoginRequest, TokenResponse
 from app.auth.models import create_user, get_user, verify_password
 from app.auth.jwt import create_access_token
+# add slowapi imports for rate limiting
+from fastapi import APIRouter, HTTPException, status, Request
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
+limiter = Limiter(key_func=get_remote_address)
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
-def register(body: RegisterRequest):
+def register(request: Request, body: RegisterRequest):
     ok = create_user(body.username, body.password, body.role)
     if not ok:
         raise HTTPException(
@@ -18,7 +23,8 @@ def register(body: RegisterRequest):
 
 
 @router.post("/login", response_model=TokenResponse)
-def login(body: LoginRequest):
+@limiter.limit("5/minute")
+def login(request: Request, body: LoginRequest):
     user = get_user(body.username)
     if not user or not verify_password(body.password, user["hashed_password"]):
         raise HTTPException(
