@@ -42,7 +42,7 @@ Sentinel is an event-driven security monitoring platform that collects, analyzes
 | Aunthentication/ authorization | In progress |
 | user/entity history | planned |
 | Search/filter events | Done |
-| Severity workflow | planned |
+| Severity workflow + Incident states| planned |
 | Rate limiting | Done |
 | Intergration tests | planned |
 | Apache Kafka event pipeline |  Planned |
