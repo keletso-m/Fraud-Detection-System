@@ -42,6 +42,12 @@ def init():
                 FOREIGN KEY (incident_id) REFERENCES incidents(id)
             )
         """)
+        #  state column to existing incidents if or when upgrading
+        try:
+            conn.execute("ALTER TABLE incidents ADD COLUMN state TEXT NOT NULL DEFAULT 'open'")
+        except sqlite3.OperationalError:
+            pass  # Column already exists,its  safe to ignore
+
 
         conn.commit()
     print(" Database initialised: incidents + users tables ready.")
