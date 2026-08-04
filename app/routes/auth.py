@@ -11,9 +11,8 @@ limiter = Limiter(key_func=get_remote_address)
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@router.post("/login", response_model=TokenResponse)
-@limiter.limit("5/minute")
-def login(request: Request, body: LoginRequest):
+@router.post("/register", status_code=status.HTTP_201_CREATED)
+def register(request: Request, body: RegisterRequest):
     ok = create_user(body.username, body.password, body.role)
     if not ok:
         raise HTTPException(
@@ -24,7 +23,8 @@ def login(request: Request, body: LoginRequest):
 
 
 @router.post("/login", response_model=TokenResponse)
-def login(body: LoginRequest):
+@limiter.limit("5/minute")
+def login(request: Request, body: LoginRequest):
     user = get_user(body.username)
     if not user or not verify_password(body.password, user["hashed_password"]):
         raise HTTPException(
