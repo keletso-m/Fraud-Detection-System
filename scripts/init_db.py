@@ -30,6 +30,19 @@ def init():
             )
         """)
 
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS incident_history (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                incident_id INTEGER NOT NULL,
+                changed_by  TEXT    NOT NULL,
+                field       TEXT    NOT NULL,
+                old_value   TEXT    NOT NULL,
+                new_value   TEXT    NOT NULL,
+                timestamp   TEXT    NOT NULL,
+                FOREIGN KEY (incident_id) REFERENCES incidents(id)
+            )
+        """)
+
         conn.commit()
     print(" Database initialised: incidents + users tables ready.")
 
