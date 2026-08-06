@@ -143,8 +143,24 @@ def update_incident_severity(incident_id: int, new_severity: str, changed_by: st
         raise ValueError(f"Invalid severity '{new_severity}'. Must be one of {VALID_SEVERITIES}")
     return _update_incident_field(incident_id, "alert_level", new_severity, changed_by)
 
-
-
+def get_incident_history(incident_id: int) -> list[dict]:
+    """returns the full audit trail for an incident thenewest first."""
+    try:
+        con = sqlite3.connect(DB_PATH)
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
+        cur.execute("""
+            SELECT id, incident_id, changed_by, field, old_value, new_value, timestamp
+            FROM incident_history
+            WHERE incident_id = ?
+            ORDER BY id DESC
+        """, (incident_id,))
+        rows = cur.fetchall()
+        con.close()
+        return [dict(row) for row in rows]
+    except Exception as exc:
+        logger.error("Failed to fetch history for incident %s: %s", incident_id, exc)
+        return []
 #helper functions 
 
 def _assign_level(score: int) -> str:
