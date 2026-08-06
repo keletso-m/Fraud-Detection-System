@@ -131,11 +131,19 @@ def get_incident_by_id(incident_id) -> dict | None:
 # incident states and severity workflow
 VALID_STATES     = {"open", "investigating", "resolved", "false_positive"}
 VALID_SEVERITIES = {"LOW", "MEDIUM", "HIGH", "CRITICAL"}
-# update incident state and record in history returns salse if not found.
+# update incident state and record in history returns salse if not found
 def update_incident_state(incident_id: int, new_state: str, changed_by: str) -> bool:
     if new_state not in VALID_STATES:
         raise ValueError(f"Invalid state '{new_state}'. Must be one of {VALID_STATES}")
     return _update_incident_field(incident_id, "state", new_state, changed_by)
+
+# update incident severity returns false if not found
+def update_incident_severity(incident_id: int, new_severity: str, changed_by: str) -> bool:
+    if new_severity not in VALID_SEVERITIES:
+        raise ValueError(f"Invalid severity '{new_severity}'. Must be one of {VALID_SEVERITIES}")
+    return _update_incident_field(incident_id, "alert_level", new_severity, changed_by)
+
+
 
 #helper functions 
 
