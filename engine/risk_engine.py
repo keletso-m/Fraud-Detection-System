@@ -21,7 +21,7 @@ LEVEL_HIGH:     int = 50
 LEVEL_MEDIUM:   int = 25
 
 
-# ── Result dataclass ───────────────────────────────────────────────────────────
+#  Result dataclass 
 
 @dataclass
 class RiskResult:
@@ -128,6 +128,14 @@ def get_incident_by_id(incident_id) -> dict | None:
         logger.error("Failed to fetch incident %s: %s", incident_id, exc)
         return None
 
+# incident states and severity workflow
+VALID_STATES     = {"open", "investigating", "resolved", "false_positive"}
+VALID_SEVERITIES = {"LOW", "MEDIUM", "HIGH", "CRITICAL"}
+# update incident state and record in history returns salse if not found.
+def update_incident_state(incident_id: int, new_state: str, changed_by: str) -> bool:
+    if new_state not in VALID_STATES:
+        raise ValueError(f"Invalid state '{new_state}'. Must be one of {VALID_STATES}")
+    return _update_incident_field(incident_id, "state", new_state, changed_by)
 
 #helper functions 
 
