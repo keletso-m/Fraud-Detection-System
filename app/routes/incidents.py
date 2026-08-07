@@ -67,8 +67,14 @@ def patch_severity(
     user: dict = Depends(require_admin),
 ):
     #manually escalate or downgrade an incident's severity.
-    
+
     ok = update_incident_severity(incident_id, body.severity, changed_by=user["username"])
     if not ok:
         raise HTTPException(status_code=404, detail=f"Incident '{incident_id}' not found.")
     return {"incident_id": incident_id, "severity": body.severity, "updated_by": user["username"]}
+
+# return the full state and severity change history for an incident
+@router.get("/{incident_id}/history", summary="Get incident audit trail")
+def get_history(incident_id: int, _=Depends(require_viewer)):
+    history = get_incident_history(incident_id)
+    return {"incident_id": incident_id, "count": len(history), "history": history}
