@@ -161,6 +161,55 @@ def get_incident_history(incident_id: int) -> list[dict]:
     except Exception as exc:
         logger.error("Failed to fetch history for incident %s: %s", incident_id, exc)
         return []
+
+    def _update_incident_field(
+    incident_id: int, field: str, new_value: str, changed_by: str
+) -> bool:
+    """Generic field updater, reads old value, writes new, logs history"""
+    try:
+        con = sqlite3.connect(DB_PATH)
+        con.row_factory = sqlite3.Row
+
+        # get current value
+        row = con.execute(
+            f"SELECT {field} FROM incidents WHERE id = ?", (incident_id,)
+        ).fetchone()
+
+        if not row:
+            con.close()
+            return False
+
+        old_value = row[field]
+
+        # update the incident
+        con.execute(
+            f"UPDATE incidents SET {field} = ? WHERE id = ?",
+            (new_value, incident_id),
+        )
+
+        # write history record
+        con.execute("""
+            INSERT INTO incident_history
+                (incident_id, changed_by, field, old_value, new_value, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (
+            incident_id,
+            changed_by,
+            field,
+            old_value,
+            new_value,
+            datetime.now(timezone.utc).isoformat(),
+        ))
+
+        con.commit()
+        con.close()
+        return True
+
+    except Exception as exc:
+        logger.error("Failed to update %s on incident %s: %s", field, incident_id, exc)
+        return False
+
+    
 #helper functions 
 
 def _assign_level(score: int) -> str:
