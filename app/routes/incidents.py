@@ -47,6 +47,7 @@ def get_incident(incident_id: str, _=Depends(require_viewer)):
         raise HTTPException(status_code=404, detail=f"Incident '{incident_id}' not found.")
     return incident
 
+# return update incident state and severity
 @router.patch("/{incident_id}/state", summary="Update incident state")
 def patch_state(
     incident_id: int,
@@ -57,3 +58,17 @@ def patch_state(
     if not ok:
         raise HTTPException(status_code=404, detail=f"Incident '{incident_id}' not found.")
     return {"incident_id": incident_id, "state": body.state, "updated_by": user["username"]}
+
+# return update incident severity
+@router.patch("/{incident_id}/severity", summary="Update incident severity")
+def patch_severity(
+    incident_id: int,
+    body: SeverityUpdate,
+    user: dict = Depends(require_admin),
+):
+    #manually escalate or downgrade an incident's severity.
+    
+    ok = update_incident_severity(incident_id, body.severity, changed_by=user["username"])
+    if not ok:
+        raise HTTPException(status_code=404, detail=f"Incident '{incident_id}' not found.")
+    return {"incident_id": incident_id, "severity": body.severity, "updated_by": user["username"]}
