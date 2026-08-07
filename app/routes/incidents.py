@@ -2,11 +2,18 @@
 import logging
 from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, Query, Depends
-
-from engine.risk_engine import get_incidents, get_incident_by_id
-from app.auth.dependencies import require_viewer
 from pydantic import BaseModel
 from typing import Literal
+from engine.risk_engine import (
+    get_incidents,
+    get_incident_by_id,
+    update_incident_state,
+    update_incident_severity,
+    get_incident_history,
+)
+from app.auth.dependencies import require_viewer, require_admin
+
+
 logger = logging.getLogger("sentinel.routes.incidents")
 router = APIRouter()
 
