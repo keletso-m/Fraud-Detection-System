@@ -44,7 +44,6 @@ class RiskResult:
             "context":      self.context,
         }
 
-
 #  Public interface
 
 def evaluate(
@@ -88,15 +87,14 @@ def evaluate(
 
     return result
 
-
+# Return recent incidents from the DB, newest first
 def get_incidents(limit: int = 50, min_score: int = 0) -> list[dict]:
-    """Return recent incidents from the DB, newest first."""
     try:
         con = sqlite3.connect(DB_PATH)
         con.row_factory = sqlite3.Row
         cur = con.cursor()
         cur.execute("""
-            SELECT id, risk_score, alert_level, reason_flags, event_type, timestamp
+            SELECT id, risk_score, alert_level, reason_flags, event_type, timestamp, state
             FROM incidents
             WHERE risk_score >= ?
             ORDER BY id DESC
@@ -109,15 +107,14 @@ def get_incidents(limit: int = 50, min_score: int = 0) -> list[dict]:
         logger.error("Failed to fetch incidents: %s", exc)
         return []
 
-
+# Return a single incident by ID, or None if not found
 def get_incident_by_id(incident_id) -> dict | None:
-    """Return a single incident by ID, or None if not found."""
     try:
         con = sqlite3.connect(DB_PATH)
         con.row_factory = sqlite3.Row
         cur = con.cursor()
         cur.execute("""
-            SELECT id, risk_score, alert_level, reason_flags, event_type, timestamp
+            SELECT id, risk_score, alert_level, reason_flags, event_type, timestamp, state
             FROM incidents
             WHERE id = ?
         """, (int(incident_id),))
@@ -165,29 +162,37 @@ def get_incident_history(incident_id: int) -> list[dict]:
     def _update_incident_field(
     incident_id: int, field: str, new_value: str, changed_by: str
 ) -> bool:
-    """Generic field updater, reads old value, writes new, logs history"""
+    """Generic field updater — reads old value, writes new, logs history."""
+    # Map field names to avoid dynamic f-string SQL (Pylance + safety)
+    column_map = {
+        "state":       "state",
+        "alert_level": "alert_level",
+    }
+    if field not in column_map:
+        logger.error("Unknown field: %s", field)
+        return False
+
+    column = column_map[field]
+
     try:
         con = sqlite3.connect(DB_PATH)
         con.row_factory = sqlite3.Row
 
-        # get current value
         row = con.execute(
-            f"SELECT {field} FROM incidents WHERE id = ?", (incident_id,)
+            f"SELECT {column} FROM incidents WHERE id = ?", (incident_id,)
         ).fetchone()
 
         if not row:
             con.close()
             return False
 
-        old_value = row[field]
+        old_value = row[column]
 
-        # update the incident
         con.execute(
-            f"UPDATE incidents SET {field} = ? WHERE id = ?",
+            f"UPDATE incidents SET {column} = ? WHERE id = ?",
             (new_value, incident_id),
         )
 
-        # write history record
         con.execute("""
             INSERT INTO incident_history
                 (incident_id, changed_by, field, old_value, new_value, timestamp)
@@ -209,7 +214,7 @@ def get_incident_history(incident_id: int) -> list[dict]:
         logger.error("Failed to update %s on incident %s: %s", field, incident_id, exc)
         return False
 
-    
+
 #helper functions 
 
 def _assign_level(score: int) -> str:
