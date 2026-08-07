@@ -1,33 +1,15 @@
-"""
-engine/activity_detector.py
-────────────────────────────────────────────────────────────
-Sentinel – Activity / Intrusion Detector
-
-Analyses a system activity event and returns:
-  - activity_score : int  (0–100, clamped)
-  - reasons        : list[str]  (plain-English flags)
-
-Input event dict shape:
-{
-    "username"      : str,
-    "ip_address"    : str,
-    "timestamp"     : str,           # ISO-8601 UTC
-    "failed_logins" : int,           # failed login attempts
-    "command"       : str,           # command executed (if any)
-}
-"""
 
 import logging
 from datetime import datetime, timezone
 
 logger = logging.getLogger("sentinel.activity_detector")
 
-# ── Configurable thresholds ────────────────────────────────────────────────────
-FAILED_LOGIN_THRESHOLD: int = 5          # flag if > this many failed logins
-OFF_HOURS_START: int        = 0          # UTC hour — start of suspicious window
-OFF_HOURS_END: int          = 5          # UTC hour — end of suspicious window
+# configurable thresholds 
+FAILED_LOGIN_THRESHOLD: int = 5          
+OFF_HOURS_START: int        = 0          
+OFF_HOURS_END: int          = 5         
 
-# ── Known safe IP prefixes ─────────────────────────────────────────────────────
+#  Known safe IP prefixes 
 KNOWN_IP_PREFIXES: list[str] = [
     "10.",
     "192.168.",
@@ -35,36 +17,30 @@ KNOWN_IP_PREFIXES: list[str] = [
     "127.",
 ]
 
-# ── Suspicious command fragments ───────────────────────────────────────────────
+#  Suspicious command fragments 
 SUSPICIOUS_COMMANDS: list[str] = [
     "wget", "curl", "nc ", "netcat", "chmod +x",
     "/etc/passwd", "/etc/shadow", "base64", "python -c",
     "bash -i", "sh -i", "nmap", "masscan", "sqlmap",
 ]
 
-# ── Score weights ──────────────────────────────────────────────────────────────
+#  Score weights 
 WEIGHT_FAILED_LOGINS:   int = 30
 WEIGHT_OFF_HOURS:       int = 15
 WEIGHT_UNKNOWN_IP:      int = 25
 WEIGHT_SUSPICIOUS_CMD:  int = 30
 
 
-# ── Public interface ───────────────────────────────────────────────────────────
+#  Public interface 
 
 def analyse(event: dict) -> dict:
-    """
-    Analyse one system activity event for intrusion signals.
+    
+    #analyse one system activity event for intrusion signals 
 
-    Returns:
-        {
-            "activity_score": int,        # 0–100
-            "reasons":        list[str],  # human-readable flags
-        }
-    """
     points  = 0
     reasons: list[str] = []
 
-    # ── 1. Excessive failed logins ─────────────────────────────────────────────
+    # too many failed logins 
     failed = int(event.get("failed_logins", 0))
     if failed > FAILED_LOGIN_THRESHOLD:
         points += WEIGHT_FAILED_LOGINS
@@ -74,7 +50,7 @@ def analyse(event: dict) -> dict:
         )
         logger.debug("Flag: failed logins (%d)", failed)
 
-    # ── 2. Off-hours access ────────────────────────────────────────────────────
+    #  weird hour access/ off hours 
     hour = _parse_hour(event.get("timestamp", ""))
     if hour is not None and OFF_HOURS_START <= hour <= OFF_HOURS_END:
         points += WEIGHT_OFF_HOURS
@@ -84,14 +60,14 @@ def analyse(event: dict) -> dict:
         )
         logger.debug("Flag: off-hours access (hour=%d)", hour)
 
-    # ── 3. Unknown IP address ──────────────────────────────────────────────────
+    # unknown IP addresses
     ip = str(event.get("ip_address", "")).strip()
     if ip and not _is_known_ip(ip):
         points += WEIGHT_UNKNOWN_IP
         reasons.append(f"Unknown IP address: {ip}")
         logger.debug("Flag: unknown IP (%s)", ip)
 
-    # ── 4. Suspicious command ──────────────────────────────────────────────────
+    # suspicious command 
     command = str(event.get("command", "")).strip().lower()
     matched = _match_suspicious_command(command)
     if matched:
@@ -115,7 +91,7 @@ def analyse(event: dict) -> dict:
     }
 
 
-# ── Private helpers ────────────────────────────────────────────────────────────
+#   helpers 
 
 def _parse_hour(timestamp: str) -> int | None:
     """Extract UTC hour from an ISO-8601 timestamp string. Returns None on failure."""

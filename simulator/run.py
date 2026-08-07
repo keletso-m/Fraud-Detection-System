@@ -1,13 +1,8 @@
 """
-simulator/run.py
-────────────────────────────────────────────────────────────
-Sentinel – Test Simulator
 
 Fires 5 synthetic scenarios through the full pipeline:
   activity_detector → risk_engine → alert_handler → SQLite
 
-Run from the project root:
-    python simulator/run.py
 """
 
 import sys

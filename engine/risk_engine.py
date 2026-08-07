@@ -1,19 +1,3 @@
-"""
-engine/risk_engine.py
-────────────────────────────────────────────────────────────
-Sentinel – Central Risk Engine
-
-Combines activity and transaction scores into a single unified
-risk result, assigns an alert level, and persists the incident
-to SQLite.
-
-Usage:
-    result = evaluate(activity_result, transaction_result, context)
-    result.risk_score    # int 0–100
-    result.alert_level   # "LOW" | "MEDIUM" | "HIGH" | "CRITICAL"
-    result.reason_flags  # list[str]
-    result.to_dict()     # serialisable dict for API responses
-"""
 
 import logging
 import sqlite3
@@ -23,21 +7,21 @@ from pathlib import Path
 
 logger = logging.getLogger("sentinel.risk_engine")
 
-# ── DB path ────────────────────────────────────────────────────────────────────
+#  DB path 
 ROOT    = Path(__file__).resolve().parent.parent
 DB_PATH = ROOT / "db" / "incidents.db"
 
-# ── Blending weights ───────────────────────────────────────────────────────────
+#  Blending weights 
 WEIGHT_ACTIVITY:    float = 0.5
 WEIGHT_TRANSACTION: float = 0.5
 
-# ── Alert level thresholds ─────────────────────────────────────────────────────
+#  alert level thresholds 
 LEVEL_CRITICAL: int = 75
 LEVEL_HIGH:     int = 50
 LEVEL_MEDIUM:   int = 25
 
 
-# ── Result dataclass ───────────────────────────────────────────────────────────
+#  Result dataclass 
 
 @dataclass
 class RiskResult:
@@ -58,20 +42,17 @@ class RiskResult:
             "event_type":   self.event_type,
             "timestamp":    self.timestamp,
             "context":      self.context,
+            
         }
 
-
-# ── Public interface ───────────────────────────────────────────────────────────
+#  Public interface
 
 def evaluate(
     activity_result:    dict,
     transaction_result: dict,
     context:            dict | None = None,
 ) -> RiskResult:
-    """
-    Combine activity + transaction scores into a unified RiskResult.
-    Persists the incident to SQLite and returns the full result.
-    """
+     
     context = context or {}
 
     activity_score    = int(activity_result.get("activity_score", 0))
@@ -107,15 +88,14 @@ def evaluate(
 
     return result
 
-
+# Return recent incidents from the DB, newest first
 def get_incidents(limit: int = 50, min_score: int = 0) -> list[dict]:
-    """Return recent incidents from the DB, newest first."""
     try:
         con = sqlite3.connect(DB_PATH)
         con.row_factory = sqlite3.Row
         cur = con.cursor()
         cur.execute("""
-            SELECT id, risk_score, alert_level, reason_flags, event_type, timestamp
+            SELECT id, risk_score, alert_level, reason_flags, event_type, timestamp, state
             FROM incidents
             WHERE risk_score >= ?
             ORDER BY id DESC
@@ -128,15 +108,14 @@ def get_incidents(limit: int = 50, min_score: int = 0) -> list[dict]:
         logger.error("Failed to fetch incidents: %s", exc)
         return []
 
-
+# Return a single incident by ID, or None if not found
 def get_incident_by_id(incident_id) -> dict | None:
-    """Return a single incident by ID, or None if not found."""
     try:
         con = sqlite3.connect(DB_PATH)
         con.row_factory = sqlite3.Row
         cur = con.cursor()
         cur.execute("""
-            SELECT id, risk_score, alert_level, reason_flags, event_type, timestamp
+            SELECT id, risk_score, alert_level, reason_flags, event_type, timestamp, state
             FROM incidents
             WHERE id = ?
         """, (int(incident_id),))
@@ -147,8 +126,99 @@ def get_incident_by_id(incident_id) -> dict | None:
         logger.error("Failed to fetch incident %s: %s", incident_id, exc)
         return None
 
+# incident states and severity workflow
+VALID_STATES     = {"open", "investigating", "resolved", "false_positive"}
+VALID_SEVERITIES = {"LOW", "MEDIUM", "HIGH", "CRITICAL"}
 
-# ── Private helpers ────────────────────────────────────────────────────────────
+
+def update_incident_state(incident_id: int, new_state: str, changed_by: str) -> bool:
+    if new_state not in VALID_STATES:
+        raise ValueError(f"Invalid state '{new_state}'. Must be one of {VALID_STATES}")
+    return _update_incident_field(incident_id, "state", new_state, changed_by)
+
+
+def update_incident_severity(incident_id: int, new_severity: str, changed_by: str) -> bool:
+    if new_severity not in VALID_SEVERITIES:
+        raise ValueError(f"Invalid severity '{new_severity}'. Must be one of {VALID_SEVERITIES}")
+    return _update_incident_field(incident_id, "alert_level", new_severity, changed_by)
+
+
+def get_incident_history(incident_id: int) -> list[dict]:
+    """Returns the full audit trail for an incident, newest first."""
+    try:
+        con = sqlite3.connect(DB_PATH)
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
+        cur.execute("""
+            SELECT id, incident_id, changed_by, field, old_value, new_value, timestamp
+            FROM incident_history
+            WHERE incident_id = ?
+            ORDER BY id DESC
+        """, (incident_id,))
+        rows = cur.fetchall()
+        con.close()
+        return [dict(row) for row in rows]
+    except Exception as exc:
+        logger.error("Failed to fetch history for incident %s: %s", incident_id, exc)
+        return []
+
+
+def _update_incident_field(
+    incident_id: int, field: str, new_value: str, changed_by: str
+) -> bool:
+    """Generic field updater, reads old value, writes new, logs history."""
+    column_map = {
+        "state":       "state",
+        "alert_level": "alert_level",
+    }
+    if field not in column_map:
+        logger.error("Unknown field: %s", field)
+        return False
+
+    column = column_map[field]
+
+    try:
+        con = sqlite3.connect(DB_PATH)
+        con.row_factory = sqlite3.Row
+
+        row = con.execute(
+            f"SELECT {column} FROM incidents WHERE id = ?", (incident_id,)
+        ).fetchone()
+
+        if not row:
+            con.close()
+            return False
+
+        old_value = row[column]
+
+        con.execute(
+            f"UPDATE incidents SET {column} = ? WHERE id = ?",
+            (new_value, incident_id),
+        )
+
+        con.execute("""
+            INSERT INTO incident_history
+                (incident_id, changed_by, field, old_value, new_value, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (
+            incident_id,
+            changed_by,
+            field,
+            old_value,
+            new_value,
+            datetime.now(timezone.utc).isoformat(),
+        ))
+
+        con.commit()
+        con.close()
+        return True
+
+    except Exception as exc:
+        logger.error("Failed to update %s on incident %s: %s", field, incident_id, exc)
+        return False
+
+
+# helper functions
 
 def _assign_level(score: int) -> str:
     if score >= LEVEL_CRITICAL:
@@ -180,8 +250,8 @@ def _row_to_dict(row: sqlite3.Row) -> dict:
         "reason_flags": row["reason_flags"].split("|") if row["reason_flags"] else [],
         "event_type":   row["event_type"],
         "timestamp":    row["timestamp"],
+        "state":        row["state"] if "state" in row.keys() else "open",
     }
-
 
 def _persist(result: RiskResult) -> int | None:
     """Write the incident to SQLite. Returns the new row ID, or None on failure."""

@@ -1,42 +1,21 @@
-"""
-engine/transaction_scorer.py
-────────────────────────────────────────────────────────────
-Sentinel – Transaction / Fraud Scorer
 
-Analyses a financial transaction event and returns:
-  - transaction_score : int  (0–100, clamped)
-  - reasons           : list[str]  (plain-English flags)
-
-Input event dict shape:
-{
-    "account_id"        : str,
-    "amount"            : float,
-    "currency"          : str,              # e.g. "ZAR", "USD"
-    "location"          : str,              # e.g. "Johannesburg"
-    "last_location"     : str,              # location of previous transaction
-    "device_id"         : str,              # fingerprint of current device
-    "known_devices"     : list[str],        # previously seen device IDs
-    "recent_tx_count"   : int,              # transactions in last 60 seconds
-    "timestamp"         : str               # ISO-8601 UTC
-}
-"""
 
 import logging
 
 logger = logging.getLogger("sentinel.transaction_scorer")
 
-# ── Configurable thresholds ────────────────────────────────────────────────────
-HIGH_AMOUNT_THRESHOLD: float = 10_000.00   # flag transactions above this value
+#  Configurable thresholds 
+HIGH_AMOUNT_THRESHOLD: float = 10_000.00   
 RAPID_TX_COUNT_THRESHOLD: int = 3          # flag if >= this many in 60 seconds
 
-# ── Score weights ──────────────────────────────────────────────────────────────
+#  Score weights 
 WEIGHT_HIGH_AMOUNT:      int = 25
 WEIGHT_RAPID_TX:         int = 30
 WEIGHT_LOCATION_MISMATCH: int = 25
 WEIGHT_NEW_DEVICE:       int = 20
 
 
-# ── Public interface ───────────────────────────────────────────────────────────
+#  Public interface 
 
 def score(event: dict) -> dict:
     """
@@ -51,7 +30,7 @@ def score(event: dict) -> dict:
     points = 0
     reasons: list[str] = []
 
-    # ── 1. High-value amount ───────────────────────────────────────────────────
+    # . High-value amount 
     amount = float(event.get("amount", 0))
     if amount > HIGH_AMOUNT_THRESHOLD:
         points += WEIGHT_HIGH_AMOUNT
@@ -62,7 +41,7 @@ def score(event: dict) -> dict:
         )
         logger.debug("Flag: high amount (%.2f)", amount)
 
-    # ── 2. Rapid repeated transactions ────────────────────────────────────────
+    #  Rapid repeated transactions 
     recent_count = int(event.get("recent_tx_count", 0))
     if recent_count >= RAPID_TX_COUNT_THRESHOLD:
         points += WEIGHT_RAPID_TX
@@ -72,7 +51,7 @@ def score(event: dict) -> dict:
         )
         logger.debug("Flag: rapid tx count (%d)", recent_count)
 
-    # ── 3. Location mismatch ──────────────────────────────────────────────────
+    #  Location mismatch 
     location      = str(event.get("location", "")).strip().lower()
     last_location = str(event.get("last_location", "")).strip().lower()
     if location and last_location and location != last_location:
@@ -83,7 +62,7 @@ def score(event: dict) -> dict:
         )
         logger.debug("Flag: location mismatch (%s vs %s)", location, last_location)
 
-    # ── 4. New / unrecognised device ──────────────────────────────────────────
+    #  New / unrecognised device 
     device_id     = str(event.get("device_id", "")).strip()
     known_devices = [str(d).strip() for d in event.get("known_devices", [])]
     if device_id and device_id not in known_devices:
@@ -107,7 +86,7 @@ def score(event: dict) -> dict:
     }
 
 
-# ── Private helpers ────────────────────────────────────────────────────────────
+# helper functions
 
 def _clamp(score: int) -> int:
     """Clamp score to [0, 100]. Always call this before returning."""
