@@ -40,7 +40,7 @@ Sentinel is an event-driven security monitoring platform that collects, analyzes
 | Event correlation | planned |
 | Better risk explanations | planned |
 | Aunthentication/ authorization | Done |
-| user/entity history | planned |
+| user/entity history | In progress |
 | Search/filter events | Done |
 | Severity workflow + Incident states| Done |
 | Rate limiting | Done |
