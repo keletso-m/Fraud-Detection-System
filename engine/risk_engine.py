@@ -42,6 +42,7 @@ class RiskResult:
             "event_type":   self.event_type,
             "timestamp":    self.timestamp,
             "context":      self.context,
+            
         }
 
 #  Public interface
@@ -128,20 +129,22 @@ def get_incident_by_id(incident_id) -> dict | None:
 # incident states and severity workflow
 VALID_STATES     = {"open", "investigating", "resolved", "false_positive"}
 VALID_SEVERITIES = {"LOW", "MEDIUM", "HIGH", "CRITICAL"}
-# update incident state and record in history returns salse if not found
+
+
 def update_incident_state(incident_id: int, new_state: str, changed_by: str) -> bool:
     if new_state not in VALID_STATES:
         raise ValueError(f"Invalid state '{new_state}'. Must be one of {VALID_STATES}")
     return _update_incident_field(incident_id, "state", new_state, changed_by)
 
-# update incident severity returns false if not found
+
 def update_incident_severity(incident_id: int, new_severity: str, changed_by: str) -> bool:
     if new_severity not in VALID_SEVERITIES:
         raise ValueError(f"Invalid severity '{new_severity}'. Must be one of {VALID_SEVERITIES}")
     return _update_incident_field(incident_id, "alert_level", new_severity, changed_by)
 
+
 def get_incident_history(incident_id: int) -> list[dict]:
-    """returns the full audit trail for an incident thenewest first."""
+    """Returns the full audit trail for an incident, newest first."""
     try:
         con = sqlite3.connect(DB_PATH)
         con.row_factory = sqlite3.Row
@@ -159,11 +162,11 @@ def get_incident_history(incident_id: int) -> list[dict]:
         logger.error("Failed to fetch history for incident %s: %s", incident_id, exc)
         return []
 
-    def _update_incident_field(
+
+def _update_incident_field(
     incident_id: int, field: str, new_value: str, changed_by: str
 ) -> bool:
-    """Generic field updater — reads old value, writes new, logs history."""
-    # Map field names to avoid dynamic f-string SQL (Pylance + safety)
+    """Generic field updater, reads old value, writes new, logs history."""
     column_map = {
         "state":       "state",
         "alert_level": "alert_level",
@@ -215,7 +218,7 @@ def get_incident_history(incident_id: int) -> list[dict]:
         return False
 
 
-#helper functions 
+# helper functions
 
 def _assign_level(score: int) -> str:
     if score >= LEVEL_CRITICAL:
@@ -247,8 +250,8 @@ def _row_to_dict(row: sqlite3.Row) -> dict:
         "reason_flags": row["reason_flags"].split("|") if row["reason_flags"] else [],
         "event_type":   row["event_type"],
         "timestamp":    row["timestamp"],
+        "state":        row["state"] if "state" in row.keys() else "open",
     }
-
 
 def _persist(result: RiskResult) -> int | None:
     """Write the incident to SQLite. Returns the new row ID, or None on failure."""
