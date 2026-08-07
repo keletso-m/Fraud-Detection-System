@@ -25,7 +25,7 @@ class StateUpdate(BaseModel):
 class SeverityUpdate(BaseModel):
     severity: Literal["LOW", "MEDIUM", "HIGH", "CRITICAL"]
 
-
+# routes for incident management
 @router.get("/", summary="List recent incidents")
 def list_incidents(
     limit:     int = Query(50,  ge=1, le=500, description="Max incidents to return"),
@@ -39,11 +39,21 @@ def list_incidents(
     incidents = get_incidents(limit=limit, min_score=min_score)
     return {"count": len(incidents), "incidents": incidents}
 
-
+# return a single incident record by it s UUID
 @router.get("/{incident_id}", summary="Get one incident by ID")
 def get_incident(incident_id: str, _=Depends(require_viewer)):
-    """Return a single incident record by its UUID."""
     incident = get_incident_by_id(incident_id)
     if not incident:
         raise HTTPException(status_code=404, detail=f"Incident '{incident_id}' not found.")
     return incident
+
+@router.patch("/{incident_id}/state", summary="Update incident state")
+def patch_state(
+    incident_id: int,
+    body: StateUpdate,
+    user: dict = Depends(require_admin),
+): # transition the incident state and record in history
+    ok = update_incident_state(incident_id, body.state, changed_by=user["username"])
+    if not ok:
+        raise HTTPException(status_code=404, detail=f"Incident '{incident_id}' not found.")
+    return {"incident_id": incident_id, "state": body.state, "updated_by": user["username"]}
