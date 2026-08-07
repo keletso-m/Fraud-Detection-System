@@ -17,6 +17,14 @@ from app.auth.dependencies import require_viewer, require_admin
 logger = logging.getLogger("sentinel.routes.incidents")
 router = APIRouter()
 
+# request models
+class StateUpdate(BaseModel):
+    state: Literal["open", "investigating", "resolved", "false_positive"]
+
+
+class SeverityUpdate(BaseModel):
+    severity: Literal["LOW", "MEDIUM", "HIGH", "CRITICAL"]
+
 
 @router.get("/", summary="List recent incidents")
 def list_incidents(
