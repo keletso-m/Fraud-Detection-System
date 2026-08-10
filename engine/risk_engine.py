@@ -251,6 +251,7 @@ def _row_to_dict(row: sqlite3.Row) -> dict:
         "event_type":   row["event_type"],
         "timestamp":    row["timestamp"],
         "state":        row["state"] if "state" in row.keys() else "open",
+        "context":      json.loads(row["context"]) if "context" in row.keys() else {},
     }
 # write the incident to SQLite and returns the new row ID, or None on failure
 def _persist(result: RiskResult) -> int | None:
