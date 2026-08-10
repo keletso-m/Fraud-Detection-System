@@ -279,3 +279,63 @@ def _persist(result: RiskResult) -> int | None:
     except Exception as exc:
         logger.error("Failed to persist incident: %s", exc)
         return None
+
+def get_entity_history(entity_type: str, entity_value: str, limit: int = 50) -> dict:
+    """Return all incidents and stats for a given username or IP address"""
+    try:
+        import json
+        con = sqlite3.connect(DB_PATH)
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
+        cur.execute("""
+            SELECT id, risk_score, alert_level, reason_flags, event_type, timestamp, state, context
+            FROM incidents
+            ORDER BY id DESC
+        """)
+        rows = cur.fetchall()
+        con.close()
+
+        # filter by entity
+        matched = []
+        for row in rows:
+            try:
+                ctx = json.loads(row["context"]) if row["context"] else {}
+            except Exception:
+                ctx = {}
+
+            value = ctx.get("username") if entity_type == "username" else ctx.get("ip_address")
+            if value and value.lower() == entity_value.lower():
+                matched.append(row)
+
+        matched = matched[:limit]
+
+        if not matched:
+            return {"entity_type": entity_type, "entity_value": entity_value, "count": 0, "incidents": [], "stats": {}}
+
+        scores     = [r["risk_score"] for r in matched]
+        severities = [r["alert_level"] for r in matched]
+
+        stats = {
+            "total_incidents": len(matched),
+            "average_score":   round(sum(scores) / len(scores), 1),
+            "highest_score":   max(scores),
+            "lowest_score":    min(scores),
+            "severity_counts": {
+                "CRITICAL": severities.count("CRITICAL"),
+                "HIGH":     severities.count("HIGH"),
+                "MEDIUM":   severities.count("MEDIUM"),
+                "LOW":      severities.count("LOW"),
+            },
+        }
+
+        return {
+            "entity_type":  entity_type,
+            "entity_value": entity_value,
+            "count":        len(matched),
+            "stats":        stats,
+            "incidents":    [_row_to_dict(r) for r in matched],
+        }
+
+    except Exception as exc:
+        logger.error("Failed to fetch entity history for %s=%s: %s", entity_type, entity_value, exc)
+        return {"entity_type": entity_type, "entity_value": entity_value, "count": 0, "incidents": [], "stats": {}}
