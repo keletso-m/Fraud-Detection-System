@@ -22,6 +22,8 @@ from app.routes.auth import router as auth_router
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+# user/ entity history
+from app.routes.entities import router as entities_router
 
 #  Paths 
 ROOT    = Path(__file__).resolve().parent.parent
@@ -111,6 +113,7 @@ app.include_router(auth_router)
 app.include_router(activity.router,     prefix="/events",    tags=["Events"])
 app.include_router(transactions.router, prefix="/events",    tags=["Events"])
 app.include_router(incidents.router,    prefix="/incidents", tags=["Incidents"])
+app.include_router(entities_router, prefix="/entities", tags=["Entities"])
 
 
 #  Root + health

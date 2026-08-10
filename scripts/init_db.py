@@ -46,7 +46,12 @@ def init():
         try:
             conn.execute("ALTER TABLE incidents ADD COLUMN state TEXT NOT NULL DEFAULT 'open'")
         except sqlite3.OperationalError:
-            pass  # Column already exists,its  safe to ignore
+            pass
+        # Add context column to existing incidents if upgrading 
+        try:
+            conn.execute("ALTER TABLE incidents ADD COLUMN context TEXT NOT NULL DEFAULT '{}'")
+        except sqlite3.OperationalError:
+            pass
 
 
         conn.commit()
