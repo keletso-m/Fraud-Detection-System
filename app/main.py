@@ -113,6 +113,7 @@ app.include_router(auth_router)
 app.include_router(activity.router,     prefix="/events",    tags=["Events"])
 app.include_router(transactions.router, prefix="/events",    tags=["Events"])
 app.include_router(incidents.router,    prefix="/incidents", tags=["Incidents"])
+app.include_router(entities_router, prefix="/entities", tags=["Entities"])
 
 
 #  Root + health
