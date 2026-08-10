@@ -252,23 +252,24 @@ def _row_to_dict(row: sqlite3.Row) -> dict:
         "timestamp":    row["timestamp"],
         "state":        row["state"] if "state" in row.keys() else "open",
     }
-
+# write the incident to SQLite and returns the new row ID, or None on failure
 def _persist(result: RiskResult) -> int | None:
-    """Write the incident to SQLite. Returns the new row ID, or None on failure."""
+    
     try:
         DB_PATH.parent.mkdir(parents=True, exist_ok=True)
         con = sqlite3.connect(DB_PATH)
         cur = con.cursor()
         cur.execute("""
             INSERT INTO incidents
-                (risk_score, alert_level, reason_flags, event_type, timestamp)
-            VALUES (?, ?, ?, ?, ?)
+                (risk_score, alert_level, reason_flags, event_type, timestamp, context)
+            VALUES (?, ?, ?, ?, ?, ?)
         """, (
             result.risk_score,
             result.alert_level,
             "|".join(result.reason_flags),
             result.event_type,
             result.timestamp,
+            json.dumps(result.context),
         ))
         con.commit()
         row_id = cur.lastrowid
