@@ -45,6 +45,8 @@ class RiskResult:
             "event_type":   self.event_type,
             "timestamp":    self.timestamp,
             "context":      self.context,
+            "explanations":      self.explanations,
+            "severity_rationale": self.severity_rationale,
             
         }
 
