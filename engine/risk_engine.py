@@ -32,6 +32,9 @@ class RiskResult:
     timestamp:    str
     incident_id:  int | None = None
     context:      dict       = field(default_factory=dict)
+    explanations:      list[str]  = field(default_factory=list)
+    severity_rationale: str       = ""
+
 
     def to_dict(self) -> dict:
         return {
