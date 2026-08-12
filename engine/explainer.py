@@ -46,3 +46,11 @@ def explain_flags(reason_flags: list[str]) -> list[str]:
         matched = _EXPLANATIONS.get(flag.lower().strip())
         explanations.append(matched if matched else f"{flag}: {_FALLBACK}")
     return explanations
+def explain_severity(
+    score: int,
+    alert_level: str,
+    event_type: str,
+    activity_score: int,
+    transaction_score: int,
+) 
+
