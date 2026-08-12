@@ -37,3 +37,12 @@ EXPLANATIONS = {
 _FALLBACK = (
     "An anomalous signal was detected. Manual review of this incident is recommended."
 )
+# severity rationale
+#return a readable explanation for each reason flag
+def explain_flags(reason_flags: list[str]) -> list[str]:
+    explanations = []
+    for flag in reason_flags:
+        # normalise flag to lowercase for matching
+        matched = _EXPLANATIONS.get(flag.lower().strip())
+        explanations.append(matched if matched else f"{flag}: {_FALLBACK}")
+    return explanations
