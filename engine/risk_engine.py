@@ -84,6 +84,15 @@ def evaluate(
         timestamp    = timestamp,
         context      = context,
     )
+     # generate human/ explaible explanations
+    result.explanations       = explain_flags(all_reasons)
+    result.severity_rationale = explain_severity(
+        score             = final_score,
+        alert_level       = alert_level,
+        event_type        = event_type,
+        activity_score    = activity_score,
+        transaction_score = transaction_score,
+    )
 
     result.incident_id = _persist(result)
 
