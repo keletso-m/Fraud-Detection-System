@@ -50,3 +50,41 @@ def _match_flag(flag: str) -> str:
         )
     return f"{flag}: An anomalous signal was detected. Manual review of this incident is recommended."
 
+def explain_severity(
+    score: int,
+    alert_level: str,
+    event_type: str,
+    activity_score: int,
+    transaction_score: int,
+) -> str:
+    """Generate a plain-English rationale for the overall risk score."""
+    parts = []
+
+    if event_type == "combined":
+        parts.append(
+            f"Both activity and transaction detectors fired simultaneously. "
+            f"Activity score: {activity_score}/100, transaction score: {transaction_score}/100. "
+            f"Combined signals produce a significantly elevated risk."
+        )
+    elif event_type == "transaction":
+        parts.append(
+            f"This incident was driven entirely by transaction signals "
+            f"with a raw score of {transaction_score}/100."
+        )
+    else:
+        parts.append(
+            f"This incident was driven entirely by activity signals "
+            f"with a raw score of {activity_score}/100."
+        )
+
+    level_map = {
+        "CRITICAL": "The final blended score of {score}/100 exceeds the CRITICAL threshold (75+). Immediate action is strongly recommended.",
+        "HIGH":     "The final blended score of {score}/100 exceeds the HIGH threshold (50+). This incident should be investigated promptly.",
+        "MEDIUM":   "The final blended score of {score}/100 exceeds the MEDIUM threshold (25+). This incident warrants monitoring and review.",
+        "LOW":      "The final blended score of {score}/100 is below the MEDIUM threshold. This incident is low risk but has been logged for visibility.",
+    }
+
+    parts.append(level_map[alert_level].format(score=score))
+
+    return " ".join(parts)
+
