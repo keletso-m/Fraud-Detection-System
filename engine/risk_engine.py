@@ -4,6 +4,7 @@ import sqlite3
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
+from engine.explainer import explain_flags, explain_severity
 
 logger = logging.getLogger("sentinel.risk_engine")
 
@@ -32,6 +33,9 @@ class RiskResult:
     timestamp:    str
     incident_id:  int | None = None
     context:      dict       = field(default_factory=dict)
+    explanations:      list[str]  = field(default_factory=list)
+    severity_rationale: str       = ""
+
 
     def to_dict(self) -> dict:
         return {
@@ -42,6 +46,8 @@ class RiskResult:
             "event_type":   self.event_type,
             "timestamp":    self.timestamp,
             "context":      self.context,
+            "explanations":      self.explanations,
+            "severity_rationale": self.severity_rationale,
             
         }
 
@@ -77,6 +83,15 @@ def evaluate(
         event_type   = event_type,
         timestamp    = timestamp,
         context      = context,
+    )
+     # generate human/ explaible explanations
+    result.explanations       = explain_flags(all_reasons)
+    result.severity_rationale = explain_severity(
+        score             = final_score,
+        alert_level       = alert_level,
+        event_type        = event_type,
+        activity_score    = activity_score,
+        transaction_score = transaction_score,
     )
 
     result.incident_id = _persist(result)
@@ -278,6 +293,8 @@ def _persist(result: RiskResult) -> int | None:
         return row_id
     except Exception as exc:
         logger.error("Failed to persist incident: %s", exc)
+        import traceback
+        traceback.print_exc()
         return None
 
 def get_entity_history(entity_type: str, entity_value: str, limit: int = 50) -> dict:
