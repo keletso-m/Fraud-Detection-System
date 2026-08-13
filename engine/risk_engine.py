@@ -293,6 +293,8 @@ def _persist(result: RiskResult) -> int | None:
         return row_id
     except Exception as exc:
         logger.error("Failed to persist incident: %s", exc)
+        import traceback
+        traceback.print_exc()
         return None
 
 def get_entity_history(entity_type: str, entity_value: str, limit: int = 50) -> dict:
