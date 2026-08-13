@@ -1,3 +1,11 @@
+def explain_flags(reason_flags: list[str]) -> list[str]:
+    """Return a readable or undastandable  explanation for each reason flag."""
+    explanations = []
+    for flag in reason_flags:
+        explanation = _match_flag(flag)
+        explanations.append(explanation)
+    return explanations
+
 _EXPLANATIONS = {
     "failed_logins > 5": (
         "Multiple failed login attempts were detected, exceeding the threshold of 5. "
