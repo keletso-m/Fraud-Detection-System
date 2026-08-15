@@ -205,3 +205,35 @@ def run_sequence(key: str, token: str):
                 time.sleep(DELAY)
 
     print(f"\n  Sequence complete — {total} incidents created.")
+    
+# main entry point
+def main():
+    import random
+    print("\nConnecting to Sentinel API...")
+    token = get_token()
+    print(" Authenticated.")
+
+    choice = menu()
+
+    if choice == "1":
+        run_sequence("takeover", token)
+    elif choice == "2":
+        run_sequence("insider", token)
+    elif choice == "3":
+        run_sequence("bruteforce", token)
+    elif choice == "4":
+        for key in SEQUENCES:
+            run_sequence(key, token)
+            time.sleep(1)
+    elif choice == "5":
+        key = random.choice(list(SEQUENCES.keys()))
+        run_sequence(key, token)
+    else:
+        print("Invalid choice.")
+        sys.exit(1)
+
+    print(f"\n  Check your dashboard → http://localhost:3000\n")
+
+
+if __name__ == "__main__":
+    main()
