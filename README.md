@@ -93,7 +93,7 @@ Dashboard runs on **http://localhost:3000**
 PYTHONPATH=$(pwd) python simulator/run.py
 ```
 
-Fires 5 synthetic scenarios through the full pipeline (🟢 LOW → 🔴 CRITICAL). Results appear live in the dashboard.
+Fires 5 synthetic scenarios through the full pipeline ( LOW →  CRITICAL). Results appear live in the dashboard.
 
 ---
 
