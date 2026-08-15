@@ -177,3 +177,7 @@ def fire(event_type: str, payload: dict, token: str) -> dict:
         json=payload,
         headers={"Authorization": f"Bearer {token}"},
     )
+    if resp.status_code != 200:
+        print(f"  API error {resp.status_code}: {resp.text}")
+        return {}
+    return resp.json()
