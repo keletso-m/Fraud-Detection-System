@@ -158,3 +158,13 @@ SEQUENCES = {
         ],
     },
 }
+# Auth
+def get_token() -> str:
+    resp = requests.post(
+        f"{BASE_URL}/auth/login",
+        json={"username": USERNAME, "password": PASSWORD},
+    )
+    if resp.status_code != 200:
+        print(f"Login failed: {resp.text}")
+        sys.exit(1)
+    return resp.json()["access_token"]
