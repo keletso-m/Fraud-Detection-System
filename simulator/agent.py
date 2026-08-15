@@ -181,3 +181,13 @@ def fire(event_type: str, payload: dict, token: str) -> dict:
         print(f"  API error {resp.status_code}: {resp.text}")
         return {}
     return resp.json()
+
+# run the sequence
+def run_sequence(key: str, token: str):
+    seq = SEQUENCES[key]
+    total = len(seq["steps"])
+
+    print(f"\n{'═' * 58}")
+    print(f"  {seq['name']}")
+    print(f"  {seq['description']}")
+    print(f"{'═' * 58}")
