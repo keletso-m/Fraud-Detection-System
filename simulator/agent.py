@@ -205,8 +205,21 @@ def run_sequence(key: str, token: str):
                 time.sleep(DELAY)
 
     print(f"\n  Sequence complete — {total} incidents created.")
-    
+# menu
+def menu() -> str:
+    print("\n╔══════════════════════════════════════╗")
+    print("║   SENTINEL AGENT SIMULATOR           ║")
+    print("╠══════════════════════════════════════╣")
+    print("║  1. Account Takeover                 ║")
+    print("║  2. Insider Threat                   ║")
+    print("║  3. Brute Force + Fraud              ║")
+    print("║  4. Run all sequences                ║")
+    print("║  5. Run random sequence              ║")
+    print("╚══════════════════════════════════════╝")
+    return input("\nSelect scenario (1-5): ").strip()
+
 # main entry point
+
 def main():
     import random
     print("\nConnecting to Sentinel API...")
