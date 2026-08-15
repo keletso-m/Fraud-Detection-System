@@ -36,8 +36,8 @@ Sentinel is an event-driven security monitoring platform that collects, analyzes
 | React dashboard (overview, incidents, submit events) | Done |
 | swagger/OpenAPI |  Done |
 | Email / SMS alerts (Twilio) |  In progress |
-| Event simulator/agent | planned |
-| Event correlation | planned |
+| Event simulator/agent | Done |
+| Event correlation | In progress |
 | Better risk explanations | In progress |
 | Aunthentication/ authorization | Done |
 | user/entity history | Done |
