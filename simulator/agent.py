@@ -191,3 +191,17 @@ def run_sequence(key: str, token: str):
     print(f"  {seq['name']}")
     print(f"  {seq['description']}")
     print(f"{'═' * 58}")
+    for i, step in enumerate(seq["steps"], 1):
+            print(f"\n  [{i}/{total}] {step['label']}")
+            result = fire(step["type"], step["payload"], token)
+            if result:
+                score = result.get("risk_score", "?")
+                level = result.get("alert_level", "?")
+                inc_id = result.get("id", "?")
+                print(f"         Score : {score}/100  Level : {level}  ID : {inc_id}")
+                if result.get("severity_rationale"):
+                    print(f"         {result['severity_rationale'][:90]}...")
+            if i < total:
+                time.sleep(DELAY)
+
+    print(f"\n  Sequence complete — {total} incidents created.")
