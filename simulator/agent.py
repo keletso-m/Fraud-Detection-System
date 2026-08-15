@@ -168,3 +168,12 @@ def get_token() -> str:
         print(f"Login failed: {resp.text}")
         sys.exit(1)
     return resp.json()["access_token"]
+
+# fire off the sequence and events 
+def fire(event_type: str, payload: dict, token: str) -> dict:
+    endpoint = f"{BASE_URL}/events/{event_type}"
+    resp = requests.post(
+        endpoint,
+        json=payload,
+        headers={"Authorization": f"Bearer {token}"},
+    )
