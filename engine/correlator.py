@@ -144,3 +144,45 @@ def _correlate_escalation(incidents: list[dict]) -> list[dict]:
                 ),
             })
     return results
+
+# database fetch 
+# fetch incidents from th last (WINDOW_MINUTES) minutes
+def _fetch_recent() -> list[dict]:
+    """Fetch incidents from the last WINDOW_MINUTES minutes."""
+    try:
+        cutoff = (
+            datetime.now(timezone.utc) - timedelta(minutes=WINDOW_MINUTES)
+        ).isoformat()
+
+        con = sqlite3.connect(DB_PATH)
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
+        cur.execute("""
+            SELECT id, risk_score, alert_level, event_type, timestamp, context
+            FROM incidents
+            WHERE timestamp >= ?
+            ORDER BY timestamp ASC
+        """, (cutoff,))
+        rows = cur.fetchall()
+        con.close()
+
+        result = []
+        for row in rows:
+            try:
+                ctx = json.loads(row["context"]) if row["context"] else {}
+            except Exception:
+                ctx = {}
+            result.append({
+                "id":          row["id"],
+                "risk_score":  row["risk_score"],
+                "alert_level": row["alert_level"],
+                "event_type":  row["event_type"],
+                "timestamp":   row["timestamp"],
+                "context":     ctx,
+            })
+        return result
+
+    except Exception as exc:
+        logger.error("Failed to fetch recent incidents for correlation: %s", exc)
+        return []
+    
