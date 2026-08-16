@@ -1,0 +1,1 @@
+""" detectspatterns across multiple incidents """
