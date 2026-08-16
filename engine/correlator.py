@@ -48,3 +48,23 @@ def _correlate_by_user(incidents: list[dict]) -> list[dict]:
         if not user or user == "unknown":
             continue
         groups.setdefault(user, []).append(inc)
+        results = []
+    for user, group in groups.items():
+        if len(group) < MIN_INCIDENTS:
+            continue
+        results.append({
+            "correlation_type": "same_user",
+            "entity":           user,
+            "entity_type":      "username",
+            "incident_count":   len(group),
+            "incident_ids":     [i["id"] for i in group],
+            "max_score":        max(i["risk_score"] for i in group),
+            "alert_levels":     [i["alert_level"] for i in group],
+            "summary": (
+                f"User '{user}' triggered {len(group)} incidents within "
+                f"{WINDOW_MINUTES} minutes. Possible account compromise or "
+                f"coordinated attack."
+            ),
+        })
+    return results
+# Group incidents by IP address within the time frame
