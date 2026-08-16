@@ -77,6 +77,7 @@ def _correlate_by_ip(incidents: list[dict]) -> list[dict]:
             continue
         groups.setdefault(ip, []).append(inc)
 
+
     results = []
     for ip, group in groups.items():
         if len(group) < MIN_INCIDENTS:
@@ -102,3 +103,44 @@ def _correlate_by_ip(incidents: list[dict]) -> list[dict]:
         })
     return results
 
+#Detect escalating severity for the same user within the time window."
+def _correlate_escalation(incidents: list[dict]) -> list[dict]:
+    """Detect escalating severity for the same user within the time window."""
+    groups: dict[str, list[dict]] = {}
+    for inc in incidents:
+        user = inc["context"].get("username", "").strip()
+        if not user or user == "unknown":
+            continue
+        groups.setdefault(user, []).append(inc)
+
+    results = []
+    for user, group in groups.items():
+        if len(group) < MIN_INCIDENTS:
+            continue
+
+        # sort by timestamp
+        sorted_group = sorted(group, key=lambda i: i["timestamp"])
+        levels = [SEVERITY_ORDER.get(i["alert_level"], 0) for i in sorted_group]
+
+        # check if severity is strictly increasing
+        is_escalating = all(levels[i] <= levels[i + 1] for i in range(len(levels) - 1))
+        has_increase  = levels[-1] > levels[0]
+
+        if is_escalating and has_increase:
+            first = sorted_group[0]["alert_level"]
+            last  = sorted_group[-1]["alert_level"]
+            results.append({
+                "correlation_type": "escalating_severity",
+                "entity":           user,
+                "entity_type":      "username",
+                "incident_count":   len(sorted_group),
+                "incident_ids":     [i["id"] for i in sorted_group],
+                "max_score":        max(i["risk_score"] for i in sorted_group),
+                "alert_levels":     [i["alert_level"] for i in sorted_group],
+                "summary": (
+                    f"User '{user}' shows escalating severity from {first} to {last} "
+                    f"across {len(sorted_group)} incidents within {WINDOW_MINUTES} minutes. "
+                    f"This is a strong indicator of an active attack in progress."
+                ),
+            })
+    return results
