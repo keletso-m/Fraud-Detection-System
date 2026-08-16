@@ -38,3 +38,13 @@ def correlate() -> list[dict]:
 
     logger.info("Correlation complete | groups=%d", len(unique))
     return unique
+
+# rules 
+# Group incidents by username within the time frame
+def _correlate_by_user(incidents: list[dict]) -> list[dict]:
+    groups: dict[str, list[dict]] = {}
+    for inc in incidents:
+        user = inc["context"].get("username", "").strip()
+        if not user or user == "unknown":
+            continue
+        groups.setdefault(user, []).append(inc)
