@@ -23,3 +23,16 @@ def register_user(username: str, password: str, role: str = "viewer"):
         "password": password,
         "role": role,
     })
+
+def login_user(username: str, password: str) -> str | None:
+    resp = client.post("/auth/login", json={
+        "username": username,
+        "password": password,
+    })
+    if resp.status_code == 200:
+        return resp.json()["access_token"]
+    return None
+
+
+def auth_header(token: str) -> dict:
+    return {"Authorization": f"Bearer {token}"}
