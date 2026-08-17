@@ -14,3 +14,12 @@ sys.path.insert(0, str(ROOT))
 from app.main import app
 
 client = TestClient(app)
+
+#helpers 
+
+def register_user(username: str, password: str, role: str = "viewer"):
+    return client.post("/auth/register", json={
+        "username": username,
+        "password": password,
+        "role": role,
+    })
