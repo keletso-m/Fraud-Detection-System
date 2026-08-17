@@ -24,6 +24,8 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 # user/ entity history
 from app.routes.entities import router as entities_router
+# event correlation
+from app.routes.correlations import router as correlations_router
 
 #  Paths 
 ROOT    = Path(__file__).resolve().parent.parent
@@ -114,7 +116,7 @@ app.include_router(activity.router,     prefix="/events",    tags=["Events"])
 app.include_router(transactions.router, prefix="/events",    tags=["Events"])
 app.include_router(incidents.router,    prefix="/incidents", tags=["Incidents"])
 app.include_router(entities_router, prefix="/entities", tags=["Entities"])
-
+app.include_router(correlations_router, prefix="/correlations", tags=["Correlations"])
 
 #  Root + health
 

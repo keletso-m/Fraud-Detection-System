@@ -9,17 +9,17 @@ def init():
 
     with sqlite3.connect(DB_PATH) as conn:
         conn.execute("""
-            CREATE TABLE IF NOT EXISTS incidents (
-                id          INTEGER PRIMARY KEY AUTOINCREMENT,
-                timestamp   TEXT    NOT NULL,
-                event_type  TEXT    NOT NULL,
-                risk_score  REAL    NOT NULL,
-                severity    TEXT    NOT NULL,
-                reasons     TEXT    NOT NULL,
-                raw_event   TEXT    NOT NULL,
-                 state       TEXT    NOT NULL DEFAULT 'open'
-            )
-        """)
+    CREATE TABLE IF NOT EXISTS incidents (
+        id              INTEGER PRIMARY KEY AUTOINCREMENT,
+        timestamp       TEXT    NOT NULL,
+        event_type      TEXT    NOT NULL,
+        risk_score      REAL    NOT NULL,
+        alert_level     TEXT    NOT NULL,
+        reason_flags    TEXT    NOT NULL,
+        state           TEXT    NOT NULL DEFAULT 'open',
+        context         TEXT    NOT NULL DEFAULT '{}'
+    )
+""")
 
         conn.execute("""
             CREATE TABLE IF NOT EXISTS users (
