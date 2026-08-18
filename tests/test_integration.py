@@ -129,6 +129,49 @@ class TestAuth:
         assert resp.status_code == 40 
 
 # protected route tests 
+class TestProtectedRoutes:
+
+    def test_activity_without_token_returns_401(self):
+        resp = client.post("/events/activity", json=ACTIVITY_PAYLOAD)
+        assert resp.status_code == 401
+
+    def test_transaction_without_token_returns_401(self):
+        resp = client.post("/events/transaction", json=TRANSACTION_PAYLOAD)
+        assert resp.status_code == 401
+
+    def test_incidents_without_token_returns_401(self):
+        resp = client.get("/incidents/")
+        assert resp.status_code == 401
+
+    def test_viewer_cannot_submit_activity(self, viewer_token):
+        resp = client.post(
+            "/events/activity",
+            json=ACTIVITY_PAYLOAD,
+            headers=auth_header(viewer_token),
+        )
+        assert resp.status_code == 403
+
+    def test_viewer_cannot_submit_transaction(self, viewer_token):
+        resp = client.post(
+            "/events/transaction",
+            json=TRANSACTION_PAYLOAD,
+            headers=auth_header(viewer_token),
+        )
+        assert resp.status_code == 403
+
+    def test_viewer_can_read_incidents(self, viewer_token):
+        resp = client.get(
+            "/incidents/",
+            headers=auth_header(viewer_token),
+        )
+        assert resp.status_code == 200
+
+    def test_invalid_token_returns_401(self):
+        resp = client.get(
+            "/incidents/",
+            headers={"Authorization": "Bearer totallynotavalidtoken"},
+        )
+        assert resp.status_code == 401
 
 
 
