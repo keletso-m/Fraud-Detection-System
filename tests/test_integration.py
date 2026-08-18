@@ -126,7 +126,7 @@ class TestAuth:
             "username": "nobody",
             "password": "password",
         })
-        assert resp.status_code == 40 
+        assert resp.status_code == 401
 
 # protected route tests 
 class TestProtectedRoutes:
