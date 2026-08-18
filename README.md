@@ -101,6 +101,10 @@ Fires 5 synthetic scenarios through the full pipeline ( LOW →  CRITICAL). Resu
 
 ```bash
 pytest tests/ -v
+
+# dependency for the tests
+python -m pip freeze | grep httpx
+
 ```
 
 **39 passed, 0 failed**
