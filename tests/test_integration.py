@@ -173,5 +173,53 @@ class TestProtectedRoutes:
         )
         assert resp.status_code == 401
 
+# event submission tests
+class TestEventSubmission:
+
+    def test_submit_activity_event(self, admin_token):
+        resp = client.post(
+            "/events/activity",
+            json=ACTIVITY_PAYLOAD,
+            headers=auth_header(admin_token),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "risk_score" in data
+        assert "alert_level" in data
+        assert "reason_flags" in data
+        assert "explanations" in data
+        assert "severity_rationale" in data
+        assert data["id"] is not None
+
+    def test_submit_transaction_event(self, admin_token):
+        resp = client.post(
+            "/events/transaction",
+            json=TRANSACTION_PAYLOAD,
+            headers=auth_header(admin_token),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "risk_score" in data
+        assert data["risk_score"] >= 0
+
+    def test_activity_high_risk_flags(self, admin_token):
+        resp = client.post(
+            "/events/activity",
+            json=ACTIVITY_PAYLOAD,
+            headers=auth_header(admin_token),
+        )
+        data = resp.json()
+        assert data["alert_level"] in ("MEDIUM", "HIGH", "CRITICAL")
+        assert len(data["reason_flags"]) > 0
+        assert len(data["explanations"]) > 0
+
+    def test_activity_invalid_payload_returns_422(self, admin_token):
+        resp = client.post(
+            "/events/activity",
+            json={"username": "alice"},  # missing required fields
+            headers=auth_header(admin_token),
+        )
+        assert resp.status_code == 422
+
 
 
