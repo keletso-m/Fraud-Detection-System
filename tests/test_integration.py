@@ -88,5 +88,47 @@ def incident_id(admin_token):
     assert inc_id is not None
     return inc_id
 
-# auth tests 
+# auth tests
+ class TestAuth:
+
+    def test_register_success(self):
+        resp = register_user("new_user_1", "password123", "viewer")
+        assert resp.status_code == 201
+        assert "created" in resp.json()["message"]
+
+    def test_register_duplicate_username(self):
+        register_user("duplicate_user", "password123")
+        resp = register_user("duplicate_user", "password123")
+        assert resp.status_code == 409
+
+    def test_login_success(self):
+        register_user("login_test_user", "password123", "viewer")
+        resp = client.post("/auth/login", json={
+            "username": "login_test_user",
+            "password": "password123",
+        })
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "access_token" in data
+        assert data["token_type"] == "bearer"
+        assert data["role"] == "viewer"
+
+    def test_login_wrong_password(self):
+        register_user("login_test_user2", "correctpass")
+        resp = client.post("/auth/login", json={
+            "username": "login_test_user2",
+            "password": "wrongpass",
+        })
+        assert resp.status_code == 401
+
+    def test_login_nonexistent_user(self):
+        resp = client.post("/auth/login", json={
+            "username": "nobody",
+            "password": "password",
+        })
+        assert resp.status_code == 40 
+
+# protected route tests 
+
+
 
