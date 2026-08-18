@@ -221,5 +221,78 @@ class TestEventSubmission:
         )
         assert resp.status_code == 422
 
+# add incident workflow tests
 
+class TestIncidentWorkflow:
 
+    def test_list_incidents(self, viewer_token):
+        resp = client.get("/incidents/", headers=auth_header(viewer_token))
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "incidents" in data
+        assert "count" in data
+
+    def test_get_incident_by_id(self, viewer_token, incident_id):
+        resp = client.get(
+            f"/incidents/{incident_id}",
+            headers=auth_header(viewer_token),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["id"] == incident_id
+        assert "state" in data
+
+    def test_get_nonexistent_incident_returns_404(self, viewer_token):
+        resp = client.get("/incidents/999999", headers=auth_header(viewer_token))
+        assert resp.status_code == 404
+
+    def test_update_incident_state(self, admin_token, incident_id):
+        resp = client.patch(
+            f"/incidents/{incident_id}/state",
+            json={"state": "investigating"},
+            headers=auth_header(admin_token),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["state"] == "investigating"
+        assert data["updated_by"] == "test_admin"
+
+    def test_update_incident_severity(self, admin_token, incident_id):
+        resp = client.patch(
+            f"/incidents/{incident_id}/severity",
+            json={"severity": "CRITICAL"},
+            headers=auth_header(admin_token),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["severity"] == "CRITICAL"
+
+    def test_viewer_cannot_update_state(self, viewer_token, incident_id):
+        resp = client.patch(
+            f"/incidents/{incident_id}/state",
+            json={"state": "resolved"},
+            headers=auth_header(viewer_token),
+        )
+        assert resp.status_code == 403
+
+    def test_invalid_state_returns_422(self, admin_token, incident_id):
+        resp = client.patch(
+            f"/incidents/{incident_id}/state",
+            json={"state": "banana"},
+            headers=auth_header(admin_token),
+        )
+        assert resp.status_code == 422
+
+    def test_incident_history_recorded(self, viewer_token, incident_id):
+        resp = client.get(
+            f"/incidents/{incident_id}/history",
+            headers=auth_header(viewer_token),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["count"] >= 1
+        entry = data["history"][0]
+        assert "changed_by" in entry
+        assert "old_value" in entry
+        assert "new_value" in entry
+        assert "timestamp" in entry
