@@ -341,7 +341,7 @@ class TestCorrelations:
         assert "window_minutes" in data
         assert "group_count" in data
         assert "correlations" in data
-def test_correlations_structure(self, viewer_token):
+    def test_correlations_structure(self, viewer_token):
         resp = client.get(
             "/correlations/",
             headers=auth_header(viewer_token),
