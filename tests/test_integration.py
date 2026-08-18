@@ -36,3 +36,29 @@ def login_user(username: str, password: str) -> str | None:
 
 def auth_header(token: str) -> dict:
     return {"Authorization": f"Bearer {token}"}
+
+ACTIVITY_PAYLOAD = {
+    "username":      "alice",
+    "ip_address":    "203.0.113.99",
+    "timestamp":     "2024-11-01T02:15:00",
+    "failed_logins": 8,
+    "command":       "cat /etc/passwd",
+}
+
+TRANSACTION_PAYLOAD = {
+    "account_id":      "alice",
+    "amount":          50000.00,
+    "currency":        "ZAR",
+    "location":        "London",
+    "last_location":   "Johannesburg",
+    "device_id":       "device-new",
+    "known_devices":   ["device-trusted"],
+    "recent_tx_count": 5,
+    "timestamp":       "2024-11-01T02:15:00",
+    "username":        "alice",
+    "ip_address":      "203.0.113.99",
+}
+
+
+
+
