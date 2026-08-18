@@ -89,7 +89,7 @@ def incident_id(admin_token):
     return inc_id
 
 # auth tests
- class TestAuth:
+class TestAuth:
 
     def test_register_success(self):
         resp = register_user("new_user_1", "password123", "viewer")
