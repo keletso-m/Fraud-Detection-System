@@ -327,3 +327,30 @@ class TestEntityHistory:
         assert resp.status_code == 200
         data = resp.json()
         assert data["count"] >= 1
+
+# correlations tests 
+class TestCorrelations:
+
+    def test_correlations_returns_200(self, viewer_token):
+        resp = client.get(
+            "/correlations/",
+            headers=auth_header(viewer_token),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "window_minutes" in data
+        assert "group_count" in data
+        assert "correlations" in data
+def test_correlations_structure(self, viewer_token):
+        resp = client.get(
+            "/correlations/",
+            headers=auth_header(viewer_token),
+        )
+        data = resp.json()
+        assert data["window_minutes"] == 60
+        if data["group_count"] > 0:
+            group = data["correlations"][0]
+            assert "correlation_type" in group
+            assert "entity" in group
+            assert "incident_ids" in group
+            assert "summary" in group
