@@ -59,6 +59,34 @@ TRANSACTION_PAYLOAD = {
     "ip_address":      "203.0.113.99",
 }
 
+# fixtures 
+@pytest.fixture(scope="module")
+def admin_token():
+    register_user("test_admin", "adminpass123", "admin")
+    token = login_user("test_admin", "adminpass123")
+    assert token is not None
+    return token
 
 
+@pytest.fixture(scope="module")
+def viewer_token():
+    register_user("test_viewer", "viewerpass123", "viewer")
+    token = login_user("test_viewer", "viewerpass123")
+    assert token is not None
+    return token
+
+# make a real incident and return its ID for workflow test
+@pytest.fixture(scope="module")
+def incident_id(admin_token):
+    resp = client.post(
+        "/events/activity",
+        json=ACTIVITY_PAYLOAD,
+        headers=auth_header(admin_token),
+    )
+    assert resp.status_code == 200
+    inc_id = resp.json().get("id")
+    assert inc_id is not None
+    return inc_id
+
+# auth tests 
 
