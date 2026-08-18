@@ -354,3 +354,18 @@ def test_correlations_structure(self, viewer_token):
             assert "entity" in group
             assert "incident_ids" in group
             assert "summary" in group
+
+# health and status tests
+class TestStatus:
+
+    def test_root_returns_200(self):
+        resp = client.get("/")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["service"] == "Sentinel"
+        assert data["status"] == "running"
+
+    def test_health_returns_ok(self):
+        resp = client.get("/health")
+        assert resp.status_code == 200
+        assert resp.json()["status"] == "ok"
