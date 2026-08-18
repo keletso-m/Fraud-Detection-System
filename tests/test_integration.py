@@ -296,3 +296,34 @@ class TestIncidentWorkflow:
         assert "old_value" in entry
         assert "new_value" in entry
         assert "timestamp" in entry
+
+# entiry history
+
+class TestEntityHistory:
+
+    def test_user_history_found(self, viewer_token):
+        resp = client.get(
+            "/entities/users/alice",
+            headers=auth_header(viewer_token),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["count"] >= 1
+        assert "stats" in data
+        assert "total_incidents" in data["stats"]
+        assert "average_score" in data["stats"]
+
+    def test_user_history_not_found(self, viewer_token):
+        resp = client.get(
+            "/entities/users/nobody_exists_xyz",
+            headers=auth_header(viewer_token),
+        )
+        assert resp.status_code == 404
+    def test_ip_history_found(self, viewer_token):
+        resp = client.get(
+            "/entities/ips/203.0.113.99",
+            headers=auth_header(viewer_token),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["count"] >= 1
