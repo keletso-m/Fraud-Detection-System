@@ -3,7 +3,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.auth.jwt import decode_token
 from app.auth.models import get_user
 
-bearer_scheme = HTTPBearer() # tells FastAPI to expect a Bearer token in the Authorization header
+bearer_scheme = HTTPBearer(auto_error=False) # tells FastAPI to expect a Bearer token in the Authorization header
 
 
 def get_current_user(
