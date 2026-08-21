@@ -62,7 +62,6 @@ class TestActivityDetector:
         result = analyse(clean_activity_event())
         assert result["activity_score"] == 0
         assert result["reasons"] == []
-
     # Failed logins 
 
     # Failed logins

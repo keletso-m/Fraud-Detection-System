@@ -22,6 +22,7 @@ SUSPICIOUS_COMMANDS: list[str] = [
     "wget", "curl", "nc ", "netcat", "chmod +x",
     "/etc/passwd", "/etc/shadow", "base64", "python -c",
     "bash -i", "sh -i", "nmap", "masscan", "sqlmap",
+    "rm -rf",
 ]
 
 #  Score weights 
