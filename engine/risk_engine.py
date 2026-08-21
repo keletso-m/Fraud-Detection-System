@@ -89,6 +89,11 @@ def evaluate(
         event_type   = event_type,
         timestamp    = timestamp,
         context      = context,
+        username      = context.get("username", "unknown"),
+        ip_address    = context.get("ip_address", "unknown"),
+        activity_score    = activity_score,
+        transaction_score = transaction_score,
+        incident_id   = str(uuid.uuid4()),
     )
      # generate human/ explaible explanations
     result.explanations       = explain_flags(all_reasons)
