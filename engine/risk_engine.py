@@ -293,7 +293,7 @@ def _persist(result: RiskResult) -> int | None:
         """, (
             result.risk_score,
             result.alert_level,
-            "|".join(result.reason_flags),
+            "|".join(result.reasons),   
             result.event_type,
             result.timestamp,
             json.dumps(result.context),
