@@ -105,7 +105,7 @@ def evaluate(
         transaction_score = transaction_score,
     )
 
-    result.incident_id = _persist(result)
+    _persist(result) # no longer overwrite the incident_id
 
     logger.info(
         "Risk evaluation complete | score=%d level=%s event=%s reasons=%d",
