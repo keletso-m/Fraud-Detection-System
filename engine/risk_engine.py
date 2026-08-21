@@ -36,6 +36,7 @@ class RiskResult:
     explanations:      list[str]  = field(default_factory=list)
     severity_rationale: str       = ""
     username:          str = "unknown"
+    ip_address:        str = "unknown"
 
 
     def to_dict(self) -> dict:
