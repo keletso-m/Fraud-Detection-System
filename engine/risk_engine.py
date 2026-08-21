@@ -42,7 +42,7 @@ class RiskResult:
             "id":           self.incident_id,
             "risk_score":   self.risk_score,
             "alert_level":  self.alert_level,
-            "reason_flags": self.reason_flags,
+            "reasons":      self.reasons,
             "event_type":   self.event_type,
             "timestamp":    self.timestamp,
             "context":      self.context,
