@@ -37,6 +37,7 @@ class RiskResult:
     severity_rationale: str       = ""
     username:          str = "unknown"
     ip_address:        str = "unknown"
+    activity_score:    int = 0
 
 
     def to_dict(self) -> dict:
