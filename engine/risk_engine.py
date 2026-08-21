@@ -38,6 +38,7 @@ class RiskResult:
     username:          str = "unknown"
     ip_address:        str = "unknown"
     activity_score:    int = 0
+    transaction_score: int = 0
 
 
     def to_dict(self) -> dict:
