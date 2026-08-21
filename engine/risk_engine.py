@@ -35,6 +35,7 @@ class RiskResult:
     context:      dict       = field(default_factory=dict)
     explanations:      list[str]  = field(default_factory=list)
     severity_rationale: str       = ""
+    username:          str = "unknown"
 
 
     def to_dict(self) -> dict:
@@ -57,6 +58,7 @@ def evaluate(
     activity_result:    dict,
     transaction_result: dict,
     context:            dict | None = None,
+
 ) -> RiskResult:
      
     context = context or {}
