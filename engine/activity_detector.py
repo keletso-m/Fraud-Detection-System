@@ -22,6 +22,7 @@ SUSPICIOUS_COMMANDS: list[str] = [
     "wget", "curl", "nc ", "netcat", "chmod +x",
     "/etc/passwd", "/etc/shadow", "base64", "python -c",
     "bash -i", "sh -i", "nmap", "masscan", "sqlmap",
+    "rm -rf",
 ]
 
 #  Score weights 
@@ -52,11 +53,11 @@ def analyse(event: dict) -> dict:
 
     #  weird hour access/ off hours 
     hour = _parse_hour(event.get("timestamp", ""))
-    if hour is not None and OFF_HOURS_START <= hour <= OFF_HOURS_END:
+    if _is_odd_hour(hour):
         points += WEIGHT_OFF_HOURS
         reasons.append(
-            f"Off-hours access: activity at {hour:02d}:00 UTC "
-            f"(window: {OFF_HOURS_START:02d}:00–{OFF_HOURS_END:02d}:00 UTC)"
+        f"Off-hours access: activity at {hour:02d}:00 UTC "
+        f"(window: {OFF_HOURS_START:02d}:00–{OFF_HOURS_END:02d}:00 UTC)"
         )
         logger.debug("Flag: off-hours access (hour=%d)", hour)
 
@@ -106,6 +107,11 @@ def _is_known_ip(ip: str) -> bool:
     """Return True if the IP starts with a known safe prefix."""
     return any(ip.startswith(prefix) for prefix in KNOWN_IP_PREFIXES)
 
+def _is_odd_hour(hour: int | None) -> bool:
+    """Return True if hour falls within the configured off-hours window (end exclusive)."""
+    if hour is None:
+        return False
+    return OFF_HOURS_START <= hour < OFF_HOURS_END
 
 def _match_suspicious_command(command: str) -> str | None:
     """Return the first suspicious fragment found in the command, or None."""

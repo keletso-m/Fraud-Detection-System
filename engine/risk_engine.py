@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from engine.explainer import explain_flags, explain_severity
+import uuid
 
 logger = logging.getLogger("sentinel.risk_engine")
 
@@ -13,8 +14,8 @@ ROOT    = Path(__file__).resolve().parent.parent
 DB_PATH = ROOT / "db" / "incidents.db"
 
 #  Blending weights 
-WEIGHT_ACTIVITY:    float = 0.5
-WEIGHT_TRANSACTION: float = 0.5
+WEIGHT_ACTIVITY:    float = 0.55
+WEIGHT_TRANSACTION: float = 0.45
 
 #  alert level thresholds 
 LEVEL_CRITICAL: int = 75
@@ -28,13 +29,17 @@ LEVEL_MEDIUM:   int = 25
 class RiskResult:
     risk_score:   int
     alert_level:  str
-    reason_flags: list[str]
+    reasons: list[str]
     event_type:   str
     timestamp:    str
     incident_id:  int | None = None
     context:      dict       = field(default_factory=dict)
     explanations:      list[str]  = field(default_factory=list)
     severity_rationale: str       = ""
+    username:          str = "unknown"
+    ip_address:        str = "unknown"
+    activity_score:    int = 0
+    transaction_score: int = 0
 
 
     def to_dict(self) -> dict:
@@ -42,7 +47,7 @@ class RiskResult:
             "id":           self.incident_id,
             "risk_score":   self.risk_score,
             "alert_level":  self.alert_level,
-            "reason_flags": self.reason_flags,
+            "reasons":      self.reasons,
             "event_type":   self.event_type,
             "timestamp":    self.timestamp,
             "context":      self.context,
@@ -57,6 +62,7 @@ def evaluate(
     activity_result:    dict,
     transaction_result: dict,
     context:            dict | None = None,
+
 ) -> RiskResult:
      
     context = context or {}
@@ -79,10 +85,15 @@ def evaluate(
     result = RiskResult(
         risk_score   = final_score,
         alert_level  = alert_level,
-        reason_flags = all_reasons,
+        reasons      = all_reasons, 
         event_type   = event_type,
         timestamp    = timestamp,
         context      = context,
+        username      = context.get("username", "unknown"),
+        ip_address    = context.get("ip_address", "unknown"),
+        activity_score    = activity_score,
+        transaction_score = transaction_score,
+        incident_id   = str(uuid.uuid4()),
     )
      # generate human/ explaible explanations
     result.explanations       = explain_flags(all_reasons)
@@ -94,7 +105,7 @@ def evaluate(
         transaction_score = transaction_score,
     )
 
-    result.incident_id = _persist(result)
+    _persist(result) # no longer overwrite the incident_id
 
     logger.info(
         "Risk evaluation complete | score=%d level=%s event=%s reasons=%d",
@@ -282,7 +293,7 @@ def _persist(result: RiskResult) -> int | None:
         """, (
             result.risk_score,
             result.alert_level,
-            "|".join(result.reason_flags),
+            "|".join(result.reasons),   
             result.event_type,
             result.timestamp,
             json.dumps(result.context),

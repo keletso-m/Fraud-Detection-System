@@ -44,10 +44,11 @@ Sentinel is an event-driven security monitoring platform that collects, analyzes
 | Search/filter events | Done |
 | Severity workflow + Incident states| Done |
 | Rate limiting | Done |
-| Intergration tests | planned |
+| Intergration tests | Done  |
 | Apache Kafka event pipeline |  Planned |
 | API rate limiting  |  Done |
 | prometheus metrics |  Planned |
+| Graffana           | planned  |
 
 
 ---
@@ -100,7 +101,15 @@ Fires 5 synthetic scenarios through the full pipeline ( LOW →  CRITICAL). Resu
 ##  Tests
 
 ```bash
+# unit tests
 pytest tests/ -v
+
+# intergration tests 
+pytest tests/test_integration.py -v
+
+# dependency for the tests
+python -m pip freeze | grep httpx
+
 ```
 
 **39 passed, 0 failed**
