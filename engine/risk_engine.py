@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from engine.explainer import explain_flags, explain_severity
+import uuid
 
 logger = logging.getLogger("sentinel.risk_engine")
 
