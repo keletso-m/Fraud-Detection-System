@@ -13,8 +13,8 @@ ROOT    = Path(__file__).resolve().parent.parent
 DB_PATH = ROOT / "db" / "incidents.db"
 
 #  Blending weights 
-WEIGHT_ACTIVITY:    float = 0.5
-WEIGHT_TRANSACTION: float = 0.5
+WEIGHT_ACTIVITY:    float = 0.55
+WEIGHT_TRANSACTION: float = 0.45
 
 #  alert level thresholds 
 LEVEL_CRITICAL: int = 75
