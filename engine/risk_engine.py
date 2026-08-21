@@ -85,7 +85,7 @@ def evaluate(
     result = RiskResult(
         risk_score   = final_score,
         alert_level  = alert_level,
-        reason_flags = all_reasons,
+        reasons      = all_reasons, 
         event_type   = event_type,
         timestamp    = timestamp,
         context      = context,
