@@ -28,7 +28,7 @@ LEVEL_MEDIUM:   int = 25
 class RiskResult:
     risk_score:   int
     alert_level:  str
-    reason_flags: list[str]
+    reasons: list[str]
     event_type:   str
     timestamp:    str
     incident_id:  int | None = None
